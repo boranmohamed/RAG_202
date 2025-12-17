@@ -21,12 +21,16 @@ Processing Flow:
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Literal, Optional
 
 import pdfplumber
 from PIL import Image
+
+# Setup logger for this module
+logger = logging.getLogger(__name__)
 
 from features.process.infrastructure.utils.ocr_utils import (
     detect_lang,
@@ -81,26 +85,35 @@ def extract_text_or_ocr(
         ocr_threshold: Minimum chars to consider page has embedded text
         
     Returns:
-        Dict with keys: page_number, source, ar, en, mixed
+        Dict with keys: page_number, source, ar, en, mixed, used_ocr
     """
     # Try embedded text first
     embedded = page.extract_text(x_tolerance=2, y_tolerance=2) or ""
     embedded = embedded.strip()
+    logger.debug(f"extract_text_or_ocr: Page {page.page_number}: Embedded text length = {len(embedded)}")
 
     # Heuristic: if embedded text is tiny, page might be scanned or mostly images/tables
     use_ocr = len(embedded) < ocr_threshold
 
     if use_ocr:
+        logger.info(f"extract_text_or_ocr: Page {page.page_number}: Using OCR (embedded={len(embedded)} < threshold={ocr_threshold})")
         # Render page to image and OCR it
-        pil_img = page.to_image(resolution=ocr_dpi).original
-        raw = ocr_image(pil_img, lang="ara+eng", psm=6)
-        lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+        try:
+            pil_img = page.to_image(resolution=ocr_dpi).original
+            raw = ocr_image(pil_img, lang="ara+eng", psm=6)
+            lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+            logger.debug(f"extract_text_or_ocr: Page {page.page_number}: OCR extracted {len(lines)} lines")
+        except Exception as e:
+            logger.error(f"extract_text_or_ocr: Page {page.page_number}: OCR failed: {e}", exc_info=True)
+            lines = []
     else:
+        logger.debug(f"extract_text_or_ocr: Page {page.page_number}: Using embedded text ({len(embedded)} chars)")
         # Use embedded text
         lines = [ln.strip() for ln in embedded.splitlines() if ln.strip()]
 
     # Split by language
     ar_lines, en_lines, mixed_lines = split_text_by_language("\n".join(lines))
+    logger.debug(f"extract_text_or_ocr: Page {page.page_number}: Language split - ar={len(ar_lines)}, en={len(en_lines)}, mixed={len(mixed_lines)}")
 
     # Join and normalize
     ar_text = normalize_arabic("\n".join(ar_lines))
@@ -113,6 +126,7 @@ def extract_text_or_ocr(
         "ar": ar_text,
         "en": en_text,
         "mixed": mixed_text,
+        "used_ocr": use_ocr,
     }
 
 
@@ -120,10 +134,15 @@ def extract_tables_best(page: pdfplumber.page.Page) -> List[Dict[str, Any]]:
     """
     Extract tables with two configurations and keep both outputs.
     
+    Uses pdfplumber's table extraction methods reliably:
+    - Primary: page.extract_tables() - extracts all tables on the page
+    - Fallback: page.extract_table() - extracts first table if extract_tables() fails
+    
     Strategy 1: Lines-based (works when PDF has ruling lines)
     Strategy 2: Text-based (works when no ruling lines)
+    Strategy 3: Explicit lines fallback (if lines fail, use explicit vertical/horizontal lines)
     
-    Both are returned; downstream can score them and pick best.
+    Both strategies are tried; downstream can score them and pick best.
     
     Args:
         page: pdfplumber page object
@@ -134,8 +153,9 @@ def extract_tables_best(page: pdfplumber.page.Page) -> List[Dict[str, Any]]:
     settings_lines = {
         "vertical_strategy": "lines",
         "horizontal_strategy": "lines",
-        "intersection_tolerance": 5,
         "snap_tolerance": 3,
+        "intersection_tolerance": 5,
+        "keep_blank_chars": True,  # Preserve empty cells for better table structure
         "join_tolerance": 3,
         "edge_min_length": 8,
         "min_words_vertical": 1,
@@ -149,6 +169,7 @@ def extract_tables_best(page: pdfplumber.page.Page) -> List[Dict[str, Any]]:
         "horizontal_strategy": "text",
         "snap_tolerance": 3,
         "join_tolerance": 3,
+        "keep_blank_chars": True,  # Preserve empty cells for better table structure
         "min_words_vertical": 2,
         "min_words_horizontal": 1,
         "text_x_tolerance": 2,
@@ -157,28 +178,88 @@ def extract_tables_best(page: pdfplumber.page.Page) -> List[Dict[str, Any]]:
 
     out: List[Dict[str, Any]] = []
 
-    for mode_name, settings in [("lines", settings_lines), ("text", settings_text)]:
+    # Strategy 1: Lines-based (primary)
+    tables_lines: List[List[List[Optional[str]]]] = []
+    try:
+        tables_lines = page.extract_tables(table_settings=settings_lines) or []
+        logger.debug(f"extract_tables_best: Page {page.page_number}: Lines strategy found {len(tables_lines)} tables")
+    except Exception as e:
+        logger.debug(f"extract_tables_best: Page {page.page_number}: Lines strategy failed: {e}")
+        # If extract_tables() fails, try extract_table() as fallback (single table)
         try:
-            tables = page.extract_tables(table_settings=settings) or []
-        except Exception:
-            tables = []
+            single_table = page.extract_table(table_settings=settings_lines)
+            if single_table:
+                tables_lines = [single_table]
+                logger.debug(f"extract_tables_best: Page {page.page_number}: Single table fallback succeeded")
+        except Exception as e2:
+            logger.debug(f"extract_tables_best: Page {page.page_number}: Single table fallback failed: {e2}")
+            # If lines strategy fails, try explicit lines fallback
+            try:
+                # Get explicit vertical and horizontal lines from page
+                vertical_lines = page.lines if hasattr(page, 'lines') else []
+                horizontal_lines = page.horizontal_edges if hasattr(page, 'horizontal_edges') else []
+                
+                logger.debug(f"extract_tables_best: Page {page.page_number}: Trying explicit lines ({len(vertical_lines)} vertical, {len(horizontal_lines)} horizontal)")
+                if vertical_lines or horizontal_lines:
+                    settings_explicit = {
+                        "explicit_vertical_lines": [line for line in vertical_lines] if vertical_lines else None,
+                        "explicit_horizontal_lines": [line for line in horizontal_lines] if horizontal_lines else None,
+                        "snap_tolerance": 3,
+                        "intersection_tolerance": 5,
+                        "keep_blank_chars": True,
+                        "join_tolerance": 3,
+                        "text_x_tolerance": 2,
+                        "text_y_tolerance": 2,
+                    }
+                    # Remove None values
+                    settings_explicit = {k: v for k, v in settings_explicit.items() if v is not None}
+                    tables_lines = page.extract_tables(table_settings=settings_explicit) or []
+                    logger.debug(f"extract_tables_best: Page {page.page_number}: Explicit lines strategy found {len(tables_lines)} tables")
+            except Exception as e3:
+                logger.debug(f"extract_tables_best: Page {page.page_number}: Explicit lines strategy failed: {e3}")
+                tables_lines = []
 
-        for idx, t in enumerate(tables):
-            # Clean cells
-            cleaned = []
-            for row in t:
-                if row is None:
-                    continue
-                cleaned.append([("" if c is None else str(c).strip()) for c in row])
+    # Strategy 2: Text-based (fallback)
+    tables_text: List[List[List[Optional[str]]]] = []
+    try:
+        tables_text = page.extract_tables(table_settings=settings_text) or []
+        logger.debug(f"extract_tables_best: Page {page.page_number}: Text strategy found {len(tables_text)} tables")
+    except Exception as e:
+        logger.debug(f"extract_tables_best: Page {page.page_number}: Text strategy failed: {e}")
+        try:
+            single_table = page.extract_table(table_settings=settings_text)
+            if single_table:
+                tables_text = [single_table]
+                logger.debug(f"extract_tables_best: Page {page.page_number}: Single table text fallback succeeded")
+        except Exception as e2:
+            logger.debug(f"extract_tables_best: Page {page.page_number}: Single table text fallback failed: {e2}")
+            tables_text = []
 
-            if cleaned:
-                out.append({
-                    "page_number": page.page_number,
-                    "mode": mode_name,
-                    "table_index": idx,
-                    "rows": cleaned,
-                })
+    # Combine results, preferring lines-based
+    all_tables = tables_lines if tables_lines else tables_text
+    logger.debug(f"extract_tables_best: Page {page.page_number}: Combined {len(all_tables)} tables (using {'lines' if tables_lines else 'text'} strategy)")
+    
+    for idx, t in enumerate(all_tables):
+        # Clean cells
+        cleaned = []
+        for row in t:
+            if row is None:
+                continue
+            cleaned.append([("" if c is None else str(c).strip()) for c in row])
 
+        if cleaned:
+            mode_name = "lines" if tables_lines else "text"
+            out.append({
+                "page_number": page.page_number,
+                "mode": mode_name,
+                "table_index": idx,
+                "rows": cleaned,
+            })
+            logger.debug(f"extract_tables_best: Page {page.page_number}, Table {idx}: Added ({len(cleaned)} rows, mode={mode_name})")
+        else:
+            logger.warning(f"extract_tables_best: Page {page.page_number}, Table {idx}: Skipped (empty after cleaning)")
+
+    logger.info(f"extract_tables_best: Page {page.page_number}: Extracted {len(out)} valid tables")
     return out
 
 
@@ -220,56 +301,93 @@ def _classify_block_type(
 
 def _parse_chapter_from_text(text: str) -> Optional[str]:
     """
-    Extract chapter name from text.
+    Extract chapter name from text (can be in headers or paragraph blocks).
     
     Looks for patterns like:
     - "الفصل 2 : المناخ" → "المناخ"
     - "Climate : Chapter 2" → "Climate"
     - "Chapter 2: Climate" → "Climate"
+    - "Chapter 1 : General Information" → "General Information"
     """
     if not text:
+        logger.debug("_parse_chapter_from_text (OCR): Empty text provided")
         return None
     
+    # More flexible patterns to handle various formats
     patterns = [
-        r'(?:الفصل|Chapter)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+)',
-        r'([^\t\n\r]+?)\s*[:：]\s*(?:الفصل|Chapter)',
+        # Pattern 1: "Chapter N : Name" (English, most common format)
+        # Matches: "Chapter 1 : General Information" → "General Information"
+        r'Chapter\s*[\d]+\s*[:：]\s*([A-Za-z][^\t\n\r\d]*?)(?:\s*\d+|$|\n)',
+        # Pattern 2: "الفصل N : Name" (Arabic)
+        r'الفصل\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
+        # Pattern 3: "Name : Chapter N" (reverse order)
+        r'([A-Za-z][^\t\n\r]+?)\s*[:：]\s*Chapter\s*[\d]+',
+        # Pattern 4: Generic pattern as fallback
+        r'(?:الفصل|Chapter)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
     ]
     
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+    for idx, pattern in enumerate(patterns, 1):
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
         if match:
             chapter_name = match.group(1).strip()
-            chapter_name = re.sub(r'\s*\d+.*$', '', chapter_name)
-            chapter_name = re.sub(r'\s{2,}', ' ', chapter_name)
-            return chapter_name.strip() if chapter_name else None
+            logger.debug(f"_parse_chapter_from_text (OCR): Pattern {idx} matched, raw: '{chapter_name}'")
+            # Clean up: remove trailing numbers, page numbers, and extra whitespace
+            chapter_name = re.sub(r'\s*\d+.*$', '', chapter_name)  # Remove trailing numbers and everything after
+            chapter_name = re.sub(r'\s{2,}', ' ', chapter_name)  # Normalize whitespace
+            chapter_name = chapter_name.strip()
+            # Only return if we got a meaningful name (at least 3 characters, not just numbers/symbols)
+            if chapter_name and len(chapter_name) >= 3 and re.search(r'[A-Za-z\u0600-\u06FF]', chapter_name):
+                logger.info(f"_parse_chapter_from_text (OCR): Extracted chapter: '{chapter_name}'")
+                return chapter_name
+            else:
+                logger.debug(f"_parse_chapter_from_text (OCR): Pattern {idx} matched but result invalid: '{chapter_name}'")
     
+    logger.debug(f"_parse_chapter_from_text (OCR): No chapter pattern matched in text (first 100 chars): '{text[:100]}'")
     return None
 
 
 def _parse_section_from_text(text: str) -> Optional[str]:
     """
-    Extract section name from text.
+    Extract section name from text (can be in headers or paragraph blocks).
     
     Looks for patterns like:
     - "القسم 1 : المناخ" → "المناخ"
     - "Section 1: Main Results" → "Main Results"
+    - "Section 1 : Climate" → "Climate"
     """
     if not text:
+        logger.debug("_parse_section_from_text (OCR): Empty text provided")
         return None
     
     patterns = [
-        r'(?:القسم|Section)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+)',
-        r'([^\t\n\r]+?)\s*[:：]\s*(?:القسم|Section)',
+        # Pattern 1: "Section N : Name" (English, most common format)
+        # Matches: "Section 1 : Climate" → "Climate"
+        r'Section\s*[\d]+\s*[:：]\s*([A-Za-z][^\t\n\r\d]*?)(?:\s*\d+|$|\n)',
+        # Pattern 2: "القسم N : Name" (Arabic)
+        r'القسم\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
+        # Pattern 3: "Name : Section N" (reverse order)
+        r'([A-Za-z][^\t\n\r]+?)\s*[:：]\s*Section\s*[\d]+',
+        # Pattern 4: Generic pattern as fallback
+        r'(?:القسم|Section)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
     ]
     
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+    for idx, pattern in enumerate(patterns, 1):
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
         if match:
             section_name = match.group(1).strip()
-            section_name = re.sub(r'\s*\d+.*$', '', section_name)
-            section_name = re.sub(r'\s{2,}', ' ', section_name)
-            return section_name.strip() if section_name else None
+            logger.debug(f"_parse_section_from_text (OCR): Pattern {idx} matched, raw: '{section_name}'")
+            # Clean up: remove trailing numbers, page numbers, and extra whitespace
+            section_name = re.sub(r'\s*\d+.*$', '', section_name)  # Remove trailing numbers and everything after
+            section_name = re.sub(r'\s{2,}', ' ', section_name)  # Normalize whitespace
+            section_name = section_name.strip()
+            # Only return if we got a meaningful name (at least 3 characters, not just numbers/symbols)
+            if section_name and len(section_name) >= 3 and re.search(r'[A-Za-z\u0600-\u06FF]', section_name):
+                logger.info(f"_parse_section_from_text (OCR): Extracted section: '{section_name}'")
+                return section_name
+            else:
+                logger.debug(f"_parse_section_from_text (OCR): Pattern {idx} matched but result invalid: '{section_name}'")
     
+    logger.debug(f"_parse_section_from_text (OCR): No section pattern matched in text (first 100 chars): '{text[:100]}'")
     return None
 
 
@@ -294,6 +412,7 @@ def extract_blocks_ocr(
     Returns:
         List of PageExtraction objects (one per page)
     """
+    logger.info(f"extract_blocks_ocr: Starting OCR extraction from '{pdf_path}' (max_pages={max_pages}, ocr_dpi={ocr_dpi}, ocr_threshold={ocr_threshold})")
     page_extractions: List[PageExtraction] = []
     
     # Track chapter/section across pages
@@ -302,17 +421,22 @@ def extract_blocks_ocr(
 
     with pdfplumber.open(pdf_path) as pdf:
         pages = pdf.pages[:max_pages] if max_pages else pdf.pages
+        total_pages = len(pages)
+        logger.info(f"extract_blocks_ocr: PDF has {total_pages} pages to process")
 
-        for page in pages:
+        for page_num, page in enumerate(pages, start=1):
+            logger.debug(f"extract_blocks_ocr: Processing page {page_num}/{total_pages}")
             page_blocks: List[PageBlock] = []
             page_height = page.height or 792  # Default letter size height
             
             # 1) Extract tables first
             tables = extract_tables_best(page)
+            logger.debug(f"extract_blocks_ocr: Page {page_num}: Found {len(tables)} tables")
             
-            for table_dict in tables:
+            for table_idx, table_dict in enumerate(tables):
                 # Convert to markdown for storage
                 md = table_to_markdown(table_dict["rows"])
+                logger.debug(f"extract_blocks_ocr: Page {page_num}, Table {table_idx}: Converted to markdown ({len(md)} chars)")
                 
                 # Store both markdown and raw rows in bilingual format
                 # Tables don't have language separation - store as Arabic content
@@ -339,15 +463,24 @@ def extract_blocks_ocr(
             ar_text = text_result["ar"]
             en_text = text_result["en"]
             mixed_text = text_result["mixed"]
+            used_ocr = text_result.get("used_ocr", False)
+            
+            if used_ocr:
+                logger.info(f"extract_blocks_ocr: Page {page_num}: Used OCR (ar_len={len(ar_text)}, en_len={len(en_text)}, mixed_len={len(mixed_text)})")
+            else:
+                logger.debug(f"extract_blocks_ocr: Page {page_num}: Used embedded text (ar_len={len(ar_text)}, en_len={len(en_text)}, mixed_len={len(mixed_text)})")
             
             # Parse chapter/section from any text (update tracking)
+            # Check both combined text and individual language texts for better detection
             all_text = f"{ar_text} {en_text} {mixed_text}"
-            page_chapter = _parse_chapter_from_text(all_text)
-            page_section = _parse_section_from_text(all_text)
+            page_chapter = _parse_chapter_from_text(all_text) or _parse_chapter_from_text(en_text) or _parse_chapter_from_text(ar_text)
+            page_section = _parse_section_from_text(all_text) or _parse_section_from_text(en_text) or _parse_section_from_text(ar_text)
             
             if page_chapter:
+                logger.info(f"extract_blocks_ocr: Page {page_num}: Found chapter '{page_chapter}'")
                 current_chapter = page_chapter
             if page_section:
+                logger.info(f"extract_blocks_ocr: Page {page_num}: Found section '{page_section}'")
                 current_section = page_section
             
             # Determine block type based on content
@@ -362,6 +495,20 @@ def extract_blocks_ocr(
             if ar_text or en_text:
                 content = BilingualContent(ar=ar_text if ar_text else None, en=en_text if en_text else None)
                 
+                # Also try to extract chapter/section from this specific block's content
+                block_text = (en_text or "") + " " + (ar_text or "")
+                block_chapter = _parse_chapter_from_text(block_text) or current_chapter
+                block_section = _parse_section_from_text(block_text) or current_section
+                
+                # Update current if found in this block
+                if block_chapter and block_chapter != current_chapter:
+                    logger.info(f"extract_blocks_ocr: Page {page_num}: Block-level chapter update to '{block_chapter}'")
+                    current_chapter = block_chapter
+                    current_section = None  # Reset section on new chapter
+                if block_section and block_section != current_section:
+                    logger.info(f"extract_blocks_ocr: Page {page_num}: Block-level section update to '{block_section}'")
+                    current_section = block_section
+                
                 page_blocks.append(PageBlock(
                     type=block_type,
                     content=content,
@@ -369,10 +516,24 @@ def extract_blocks_ocr(
                     chapter=current_chapter,
                     section=current_section,
                 ))
+                logger.debug(f"extract_blocks_ocr: Page {page_num}: Added {block_type} block (chapter='{current_chapter}', section='{current_section}')")
             
             # 4) Handle mixed lines separately if any
             if mixed_text:
                 content = BilingualContent(ar=mixed_text, en=None)
+                
+                # Also try to extract chapter/section from mixed text
+                block_chapter = _parse_chapter_from_text(mixed_text) or current_chapter
+                block_section = _parse_section_from_text(mixed_text) or current_section
+                
+                # Update current if found in this block
+                if block_chapter and block_chapter != current_chapter:
+                    logger.info(f"extract_blocks_ocr: Page {page_num}: Mixed-text block chapter update to '{block_chapter}'")
+                    current_chapter = block_chapter
+                    current_section = None  # Reset section on new chapter
+                if block_section and block_section != current_section:
+                    logger.info(f"extract_blocks_ocr: Page {page_num}: Mixed-text block section update to '{block_section}'")
+                    current_section = block_section
                 
                 page_blocks.append(PageBlock(
                     type="paragraph",
@@ -381,13 +542,18 @@ def extract_blocks_ocr(
                     chapter=current_chapter,
                     section=current_section,
                 ))
+                logger.debug(f"extract_blocks_ocr: Page {page_num}: Added mixed-text paragraph block ({len(mixed_text)} chars)")
             
             # Create PageExtraction for this page
+            blocks_with_chapter = sum(1 for b in page_blocks if b.chapter)
+            blocks_with_section = sum(1 for b in page_blocks if b.section)
+            logger.info(f"extract_blocks_ocr: Page {page_num}: Created {len(page_blocks)} blocks ({blocks_with_chapter} with chapter, {blocks_with_section} with section)")
             page_extractions.append(PageExtraction(
                 pageNumber=page.page_number,
                 blocks=page_blocks
             ))
 
+    logger.info(f"extract_blocks_ocr: OCR extraction complete - {len(page_extractions)} pages extracted")
     return page_extractions
 
 

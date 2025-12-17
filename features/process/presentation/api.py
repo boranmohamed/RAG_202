@@ -6,6 +6,7 @@ Feature: synchronous "extract + Arabic-aware preprocess" for a given on-disk PDF
 
 from __future__ import annotations
 
+import logging
 import os
 import tempfile
 from datetime import datetime
@@ -13,6 +14,9 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 from features.process.application.dtos import (
     ExtractPdfRequestDTO,
@@ -151,13 +155,17 @@ class Chunk(BaseModel):
 
 
 class ChunkingRequest(BaseModel):
-    """Request for chunking normalized blocks (legacy - for direct block input)."""
+    """
+    Request for chunking normalized blocks (legacy - for direct block input).
+    
+    Following Yearbook 2025 rules: character-based limits (NOT token-based).
+    """
     blocks: list[NormalizedBlock]  # From extraction pipeline
     document_name: str = "Statistical Year Book 2025"
     year: int = 2024
-    max_tokens: int = 350
-    min_tokens: int = 120
-    overlap_tokens: int = 40
+    max_chars: int = 1500  # Maximum characters per chunk (~1500 per language block)
+    min_chars: int = 20  # Minimum characters per chunk (reduced to capture more content)
+    overlap_chars: int = 100  # Overlap between chunks in characters
 
 
 class ChunkingResponse(BaseModel):
@@ -238,9 +246,9 @@ async def chunk_blocks(
     pdf_file: UploadFile = File(...),
     document_name: str = Form("Statistical Year Book 2025"),
     year: int = Form(2024),
-    max_tokens: int = Form(350),
-    min_tokens: int = Form(120),
-    overlap_tokens: int = Form(40),
+    max_chars: int = Form(1500),
+    min_chars: int = Form(20),  # Reduced from 50 to capture more content
+    overlap_chars: int = Form(100),
 ) -> ChunkingResponse:
     """
     Extract and chunk PDF in one step.
@@ -253,25 +261,19 @@ async def chunk_blocks(
     2. Phase 2: Arabic/English normalization
     3. Phase 3: Chunking with strict rules enforcement
     
-    Rules enforced:
-    - Never chunk across sections
-    - Titles are metadata only
-    - TOC/index pages never chunked
-    - One chunk = one meaning
-    - Arabic + English stay together
-    - Sentence boundaries are sacred
-    - Tables are isolated
-    - No duplicate content
-    - No broken text
-    - Metadata required
+    Following Yearbook 2025 rules:
+    - Character-based limits (NOT token-based)
+    - ~1500 characters per language block
+    - Semantic boundaries (headings, sections, chapters)
+    - NEVER cut tables, bilingual paragraphs, Arabic sentences mid-way
     
     Args:
         pdf_file: PDF file to upload and process
         document_name: Name of the document
         year: Year of the document
-        max_tokens: Maximum tokens per chunk
-        min_tokens: Minimum tokens per chunk
-        overlap_tokens: Token overlap between chunks
+        max_chars: Maximum characters per chunk (~1500 per language block)
+        min_chars: Minimum characters per chunk
+        overlap_chars: Overlap between chunks in characters
         
     Returns:
         ChunkingResponse with validated chunks ready for embedding
@@ -303,16 +305,21 @@ async def chunk_blocks(
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"PDF extraction failed: {e}") from e
         
+        # Log extraction results
+        logger.info(f"API: Phase 1+2 complete - {len(extract_dto_out.blocks)} blocks extracted from {extract_dto_out.pages} pages")
+        
         # Step 2: Chunk the extracted blocks (Phase 3)
         chunking_use_case = build_chunking_use_case()
         chunking_dto_in = ChunkingRequestDTO(
             blocks=extract_dto_out.blocks,
             document_name=document_name,
             year=year,
-            max_tokens=max_tokens,
-            min_tokens=min_tokens,
-            overlap_tokens=overlap_tokens,
+            max_chars=max_chars,
+            min_chars=min_chars,
+            overlap_chars=overlap_chars,
         )
+        
+        logger.info(f"API: Passing {len(extract_dto_out.blocks)} blocks to chunking phase")
         
         try:
             chunking_dto_out: ChunkingResponseDTO = chunking_use_case.execute(chunking_dto_in)
@@ -370,13 +377,17 @@ async def chunk_blocks(
 
 
 class ProcessOcrRequest(BaseModel):
-    """Request for unified OCR pipeline (Extract + Preprocess + Chunk)."""
+    """
+    Request for unified OCR pipeline (Extract + Preprocess + Chunk).
+    
+    Following Yearbook 2025 rules: character-based limits (NOT token-based).
+    """
     pdf_path: str
     document_name: str = "Statistical Year Book 2025"
     year: int = 2024
-    max_tokens: int = 350
-    min_tokens: int = 120
-    overlap_tokens: int = 40
+    max_chars: int = 1500  # Maximum characters per chunk (~1500 per language block)
+    min_chars: int = 20  # Minimum characters per chunk (reduced to capture more content)
+    overlap_chars: int = 100  # Overlap between chunks in characters
     ocr_dpi: int = 300
     ocr_threshold: int = 50
     max_pages: int | None = None
@@ -399,7 +410,13 @@ def process_pdf_with_ocr(request: ProcessOcrRequest) -> ChunkingResponse:
     Pipeline:
     1. Phase 1 OCR: Extract with pdfplumber (embedded text when available, OCR for scanned pages)
     2. Phase 2 OCR: Normalize with OCR-specific fixes (ligature artifacts, Arabic paragraph merging)
-    3. Phase 3: Chunk with ChunkWise rules (table atomicity, bilingual support, token-based sizing)
+    3. Phase 3: Chunk with semantic boundaries (table atomicity, bilingual support, character-based sizing)
+    
+    Following Yearbook 2025 rules:
+    - Character-based limits (NOT token-based)
+    - ~1500 characters per language block
+    - Semantic boundaries (headings, sections, chapters)
+    - NEVER cut tables, bilingual paragraphs, Arabic sentences mid-way
     
     Args:
         request: OCR processing request with PDF path and parameters
@@ -423,9 +440,9 @@ def process_pdf_with_ocr(request: ProcessOcrRequest) -> ChunkingResponse:
         pdf_path=request.pdf_path,
         document_name=request.document_name,
         year=request.year,
-        max_tokens=request.max_tokens,
-        min_tokens=request.min_tokens,
-        overlap_tokens=request.overlap_tokens,
+        max_chars=request.max_chars,
+        min_chars=request.min_chars,
+        overlap_chars=request.overlap_chars,
         ocr_dpi=request.ocr_dpi,
         ocr_threshold=request.ocr_threshold,
         max_pages=request.max_pages,
@@ -476,6 +493,99 @@ def process_pdf_with_ocr(request: ProcessOcrRequest) -> ChunkingResponse:
         total_chunks=dto_out.total_chunks,
         narrative_chunks=dto_out.narrative_chunks,
         table_chunks=dto_out.table_chunks,
+    )
+
+
+@router.post("/chunk-blocks", response_model=ChunkingResponse)
+async def chunk_extracted_blocks(
+    request: ChunkingRequest
+) -> ChunkingResponse:
+    """
+    Chunk already-extracted blocks from the /extract endpoint.
+    
+    This endpoint allows you to:
+    1. First call /extract to get normalized blocks
+    2. Then call this endpoint to chunk those blocks
+    
+    This ensures all extracted blocks get chunked.
+    
+    Args:
+        request: ChunkingRequest with blocks from /extract endpoint
+        
+    Returns:
+        ChunkingResponse with validated chunks ready for embedding
+    """
+    logger.info(f"API: /chunk-blocks - Received {len(request.blocks)} blocks to chunk")
+    
+    # Convert API models to DTOs
+    block_dtos = []
+    for block in request.blocks:
+        block_dtos.append(
+            NormalizedBlockDTO(
+                pageNumber=block.pageNumber,
+                type=block.type,
+                content={
+                    "ar": block.content.ar,
+                    "en": block.content.en,
+                },
+                chapter=block.chapter,
+                section=block.section,
+            )
+        )
+    
+    # Create chunking request DTO
+    chunking_dto_in = ChunkingRequestDTO(
+        blocks=block_dtos,
+        document_name=request.document_name,
+        year=request.year,
+        max_chars=request.max_chars,
+        min_chars=request.min_chars,
+        overlap_chars=request.overlap_chars,
+    )
+    
+    # Execute chunking
+    chunking_use_case = build_chunking_use_case()
+    try:
+        chunking_dto_out: ChunkingResponseDTO = chunking_use_case.execute(chunking_dto_in)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chunking failed: {e}") from e
+    
+    # Convert DTOs to API models
+    chunks = []
+    for chunk_dto in chunking_dto_out.chunks:
+        chunks.append(
+            Chunk(
+                chunk_id=chunk_dto.chunk_id,
+                content=BilingualContent(
+                    ar=chunk_dto.content.get("ar"),
+                    en=chunk_dto.content.get("en"),
+                ),
+                metadata=ChunkMetadata(
+                    document=chunk_dto.metadata.document,
+                    year=chunk_dto.metadata.year,
+                    chapter=chunk_dto.metadata.chapter,
+                    section=chunk_dto.metadata.section,
+                    page_start=chunk_dto.metadata.page_start,
+                    page_end=chunk_dto.metadata.page_end,
+                    chunk_type=chunk_dto.metadata.chunk_type,
+                    language=chunk_dto.metadata.language,
+                    embedding_allowed=chunk_dto.metadata.embedding_allowed,
+                ),
+            )
+        )
+    
+    # Save chunks to file automatically
+    try:
+        saved_path = save_chunks_to_file(chunks, request.document_name)
+        logger.info(f"Chunks saved to: {saved_path}")
+    except Exception as e:
+        logger.warning(f"Failed to save chunks to file: {e}")
+    
+    return ChunkingResponse(
+        chunks=chunks,
+        total_chunks=chunking_dto_out.total_chunks,
+        narrative_chunks=chunking_dto_out.narrative_chunks,
+        table_chunks=chunking_dto_out.table_chunks,
     )
 
 

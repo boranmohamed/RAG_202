@@ -17,6 +17,7 @@ IMPORTANT:
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Literal, Optional
@@ -24,6 +25,9 @@ from typing import Any, Dict, List, Literal, Optional
 import json
 
 import fitz  # PyMuPDF
+
+# Setup logger for this module
+logger = logging.getLogger(__name__)
 
 
 BlockType = Literal["header", "paragraph", "table", "toc", "footer"]
@@ -85,59 +89,94 @@ def _classify_block_type(
 
 def _parse_chapter_from_header(text: str) -> Optional[str]:
     """
-    Extract chapter name from header text.
+    Extract chapter name from text (can be in headers or paragraph blocks).
     
     Looks for patterns like:
     - "الفصل 2 : المناخ" → "المناخ"
     - "Climate : Chapter 2" → "Climate"
     - "Chapter 2: Climate" → "Climate"
+    - "Chapter 1 : General Information" → "General Information"
     """
     if not text:
+        logger.debug("_parse_chapter_from_header: Empty text provided")
         return None
     
     # Arabic and English chapter patterns
+    # More flexible patterns to handle various formats
     patterns = [
-        r'(?:الفصل|Chapter)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+)',  # Chapter N: Name (stop at tab/newline/digit)
-        r'([^\t\n\r]+?)\s*[:：]\s*(?:الفصل|Chapter)',  # Name: Chapter N (stop at tab/newline)
+        # Pattern 1: "Chapter N : Name" (English, most common format)
+        # Matches: "Chapter 1 : General Information" → "General Information"
+        r'Chapter\s*[\d]+\s*[:：]\s*([A-Za-z][^\t\n\r\d]*?)(?:\s*\d+|$|\n)',
+        # Pattern 2: "الفصل N : Name" (Arabic)
+        r'الفصل\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
+        # Pattern 3: "Name : Chapter N" (reverse order)
+        r'([A-Za-z][^\t\n\r]+?)\s*[:：]\s*Chapter\s*[\d]+',
+        # Pattern 4: Generic pattern as fallback
+        r'(?:الفصل|Chapter)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
     ]
     
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+    for idx, pattern in enumerate(patterns, 1):
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
         if match:
             chapter_name = match.group(1).strip()
-            # Clean up: remove trailing Arabic text, numbers, and extra whitespace
+            logger.debug(f"_parse_chapter_from_header: Pattern {idx} matched, raw: '{chapter_name}'")
+            # Clean up: remove trailing numbers, page numbers, and extra whitespace
             chapter_name = re.sub(r'\s*\d+.*$', '', chapter_name)  # Remove trailing numbers and everything after
             chapter_name = re.sub(r'\s{2,}', ' ', chapter_name)  # Normalize whitespace
-            return chapter_name.strip() if chapter_name else None
+            chapter_name = chapter_name.strip()
+            # Only return if we got a meaningful name (at least 3 characters, not just numbers/symbols)
+            if chapter_name and len(chapter_name) >= 3 and re.search(r'[A-Za-z\u0600-\u06FF]', chapter_name):
+                logger.info(f"_parse_chapter_from_header: Extracted chapter: '{chapter_name}'")
+                return chapter_name
+            else:
+                logger.debug(f"_parse_chapter_from_header: Pattern {idx} matched but result invalid: '{chapter_name}'")
     
+    logger.debug(f"_parse_chapter_from_header: No chapter pattern matched in text (first 100 chars): '{text[:100]}'")
     return None
 
 
 def _parse_section_from_header(text: str) -> Optional[str]:
     """
-    Extract section name from header text.
+    Extract section name from text (can be in headers or paragraph blocks).
     
     Looks for patterns like:
     - "القسم 1 : المناخ" → "المناخ"
     - "Section 1: Main Results" → "Main Results"
+    - "Section 1 : Climate" → "Climate"
     """
     if not text:
+        logger.debug("_parse_section_from_header: Empty text provided")
         return None
     
     patterns = [
-        r'(?:القسم|Section)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+)',  # Section N: Name (stop at tab/newline/digit)
-        r'([^\t\n\r]+?)\s*[:：]\s*(?:القسم|Section)',  # Name: Section N (stop at tab/newline)
+        # Pattern 1: "Section N : Name" (English, most common format)
+        # Matches: "Section 1 : Climate" → "Climate"
+        r'Section\s*[\d]+\s*[:：]\s*([A-Za-z][^\t\n\r\d]*?)(?:\s*\d+|$|\n)',
+        # Pattern 2: "القسم N : Name" (Arabic)
+        r'القسم\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
+        # Pattern 3: "Name : Section N" (reverse order)
+        r'([A-Za-z][^\t\n\r]+?)\s*[:：]\s*Section\s*[\d]+',
+        # Pattern 4: Generic pattern as fallback
+        r'(?:القسم|Section)\s*[\d]+\s*[:：]\s*([^\t\n\r\d]+?)(?:\s*\d+|$|\n)',
     ]
     
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+    for idx, pattern in enumerate(patterns, 1):
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
         if match:
             section_name = match.group(1).strip()
-            # Clean up: remove trailing Arabic text, numbers, and extra whitespace
+            logger.debug(f"_parse_section_from_header: Pattern {idx} matched, raw: '{section_name}'")
+            # Clean up: remove trailing numbers, page numbers, and extra whitespace
             section_name = re.sub(r'\s*\d+.*$', '', section_name)  # Remove trailing numbers and everything after
             section_name = re.sub(r'\s{2,}', ' ', section_name)  # Normalize whitespace
-            return section_name.strip() if section_name else None
+            section_name = section_name.strip()
+            # Only return if we got a meaningful name (at least 3 characters, not just numbers/symbols)
+            if section_name and len(section_name) >= 3 and re.search(r'[A-Za-z\u0600-\u06FF]', section_name):
+                logger.info(f"_parse_section_from_header: Extracted section: '{section_name}'")
+                return section_name
+            else:
+                logger.debug(f"_parse_section_from_header: Pattern {idx} matched but result invalid: '{section_name}'")
     
+    logger.debug(f"_parse_section_from_header: No section pattern matched in text (first 100 chars): '{text[:100]}'")
     return None
 
 
@@ -371,22 +410,30 @@ def _extract_text_blocks(page: "fitz.Page", is_toc_page: bool) -> List[PageBlock
     """
     page_height = page.rect.height
     blocks_raw = page.get_text("blocks", sort=True) or []
+    logger.debug(f"_extract_text_blocks: Found {len(blocks_raw)} raw blocks from PyMuPDF")
 
     blocks: List[PageBlock] = []
+    skipped_count = 0
 
     for block in blocks_raw:
         # block format: (x0, y0, x1, y1, text, block_no, block_type, ...)
         if len(block) < 7:
+            skipped_count += 1
+            logger.debug(f"_extract_text_blocks: Skipping block with insufficient data (len={len(block)})")
             continue
 
         x0, y0, x1, y1, text, _block_no, block_type = block[:7]
 
         # 0 = text block according to PyMuPDF
         if block_type != 0:
+            skipped_count += 1
+            logger.debug(f"_extract_text_blocks: Skipping non-text block (type={block_type})")
             continue
 
         raw_text = (text or "").strip()
         if not raw_text:
+            skipped_count += 1
+            logger.debug(f"_extract_text_blocks: Skipping empty text block")
             continue
 
         bbox = [float(x0), float(y0), float(x1), float(y1)]
@@ -402,6 +449,7 @@ def _extract_text_blocks(page: "fitz.Page", is_toc_page: bool) -> List[PageBlock
             # Mixed: put in Arabic field for now, pairing logic will handle it
             content = BilingualContent(ar=raw_text, en=None)
 
+        logger.debug(f"_extract_text_blocks: Created {block_kind} block (lang={lang}, text_len={len(raw_text)})")
         blocks.append(
             PageBlock(
                 type=block_kind,
@@ -410,6 +458,7 @@ def _extract_text_blocks(page: "fitz.Page", is_toc_page: bool) -> List[PageBlock
             )
         )
 
+    logger.info(f"_extract_text_blocks: Extracted {len(blocks)} text blocks, skipped {skipped_count}")
     return blocks
 
 
@@ -525,8 +574,11 @@ def extract_structured_pdf(pdf_path: str) -> List[Dict[str, Any]]:
       ...
     ]
     """
+    logger.info(f"extract_structured_pdf: Starting extraction from '{pdf_path}'")
     doc = fitz.open(pdf_path)
     try:
+        total_pages = len(doc)
+        logger.info(f"extract_structured_pdf: PDF has {total_pages} pages")
         pages: List[Dict[str, Any]] = []
         
         # Track current chapter/section across pages
@@ -534,10 +586,14 @@ def extract_structured_pdf(pdf_path: str) -> List[Dict[str, Any]]:
         current_section: Optional[str] = None
 
         for i, page in enumerate(doc, start=1):
+            logger.debug(f"extract_structured_pdf: Processing page {i}/{total_pages}")
             is_toc = _is_toc_like_page(page)
+            if is_toc:
+                logger.debug(f"extract_structured_pdf: Page {i} identified as TOC page")
 
             text_blocks = _extract_text_blocks(page, is_toc_page=is_toc)
             table_blocks = _extract_table_blocks(page, is_toc_page=is_toc)
+            logger.debug(f"extract_structured_pdf: Page {i} - {len(text_blocks)} text blocks, {len(table_blocks)} table blocks")
 
             # Do NOT merge pages; every page stands alone.
             all_blocks = text_blocks + table_blocks
@@ -545,24 +601,49 @@ def extract_structured_pdf(pdf_path: str) -> List[Dict[str, Any]]:
             # Pair bilingual blocks (Arabic + English together)
             page_width = page.rect.width
             paired_blocks = _pair_bilingual_blocks(all_blocks, page_width)
+            logger.debug(f"extract_structured_pdf: Page {i} - {len(paired_blocks)} blocks after pairing")
             
-            # Extract chapter/section from headers and propagate to all blocks
-            for block in paired_blocks:
-                if block.type == "header":
-                    # Try to extract chapter/section from header text
-                    text = block.content.ar or block.content.en or ""
+            # Two-pass approach for better chapter/section extraction:
+            # Pass 1: Extract chapter/section from ALL blocks on this page
+            # This ensures we find chapter/section even if they appear in paragraph blocks
+            page_chapter: Optional[str] = None
+            page_section: Optional[str] = None
+            
+            for block_idx, block in enumerate(paired_blocks):
+                text = block.content.ar or block.content.en or ""
+                if text:
                     chapter = _parse_chapter_from_header(text)
                     section = _parse_section_from_header(text)
                     
                     if chapter:
-                        current_chapter = chapter
-                        current_section = None  # Reset section on new chapter
+                        logger.info(f"extract_structured_pdf: Page {i}, Block {block_idx}: Found chapter '{chapter}'")
+                        page_chapter = chapter
+                        page_section = None  # Reset section on new chapter
                     elif section:
-                        current_section = section
-                
-                # Propagate current chapter/section to all blocks
+                        logger.info(f"extract_structured_pdf: Page {i}, Block {block_idx}: Found section '{section}'")
+                        page_section = section
+            
+            # Update current chapter/section if found on this page
+            if page_chapter:
+                logger.info(f"extract_structured_pdf: Page {i}: Updating current_chapter to '{page_chapter}'")
+                current_chapter = page_chapter
+                current_section = None  # Reset section on new chapter
+            if page_section:
+                logger.info(f"extract_structured_pdf: Page {i}: Updating current_section to '{page_section}'")
+                current_section = page_section
+            
+            # Pass 2: Propagate current chapter/section to ALL blocks on this page
+            blocks_with_chapter = 0
+            blocks_with_section = 0
+            for block in paired_blocks:
                 block.chapter = current_chapter
                 block.section = current_section
+                if block.chapter:
+                    blocks_with_chapter += 1
+                if block.section:
+                    blocks_with_section += 1
+            
+            logger.info(f"extract_structured_pdf: Page {i}: {blocks_with_chapter} blocks with chapter, {blocks_with_section} blocks with section")
 
             page_extraction = PageExtraction(
                 pageNumber=i,
@@ -570,7 +651,11 @@ def extract_structured_pdf(pdf_path: str) -> List[Dict[str, Any]]:
             )
             pages.append(asdict(page_extraction))
 
+        logger.info(f"extract_structured_pdf: Extraction complete - {len(pages)} pages extracted")
         return pages
+    except Exception as e:
+        logger.error(f"extract_structured_pdf: Error during extraction: {e}", exc_info=True)
+        raise
     finally:
         doc.close()
 

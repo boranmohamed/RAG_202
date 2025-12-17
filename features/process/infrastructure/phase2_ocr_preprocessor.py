@@ -19,6 +19,7 @@ Output format:
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Literal, Optional
@@ -27,7 +28,11 @@ from features.process.infrastructure.utils.ocr_utils import (
     detect_lang,
     normalize_arabic as normalize_arabic_basic,
     normalize_english as normalize_english_basic,
+    clean_ocr_text,
 )
+
+# Setup logger for this module
+logger = logging.getLogger(__name__)
 
 
 BlockType = Literal["header", "paragraph", "table", "toc", "footer"]
@@ -94,9 +99,10 @@ def normalize_arabic_ocr(text: str) -> str:
     OCR-aware Arabic normalization.
     
     Steps:
-    1. Apply OCR-specific fixes (ligatures, common confusions)
-    2. Apply basic Arabic normalization (Alef, Ya, etc.)
-    3. Normalize whitespace
+    1. Apply comprehensive OCR cleaning (Unicode control chars, diacritics, numerals)
+    2. Apply OCR-specific fixes (ligatures, common confusions)
+    3. Apply basic Arabic normalization (Alef, Ya, etc.)
+    4. Normalize whitespace
     
     Args:
         text: Arabic text to normalize
@@ -107,10 +113,13 @@ def normalize_arabic_ocr(text: str) -> str:
     if not text or not text.strip():
         return ""
     
-    # Step 1: Fix OCR artifacts
+    # Step 1: Apply comprehensive OCR cleaning (diacritics, control chars, numerals)
+    text = clean_ocr_text(text)
+    
+    # Step 2: Fix OCR artifacts (ligatures, common confusions)
     text = apply_ocr_arabic_fixes(text)
     
-    # Step 2: Apply basic normalization
+    # Step 3: Apply basic normalization
     text = normalize_arabic_basic(text)
     
     return text
@@ -257,21 +266,28 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             }
         ]
     """
+    logger.info(f"normalize_ocr_blocks: Starting OCR normalization - {len(pages)} pages")
     normalized_blocks: List[Dict[str, Any]] = []
     
     # Track Arabic text across consecutive blocks for merging
     pending_ar: List[str] = []
     pending_metadata: Optional[Dict[str, Any]] = None
+    total_blocks = 0
+    skipped_blocks = 0
+    merged_arabic_count = 0
     
     def flush_pending_arabic():
         """Flush accumulated Arabic text as a single block."""
-        nonlocal pending_ar, pending_metadata
+        nonlocal pending_ar, pending_metadata, merged_arabic_count
         
         if pending_ar and pending_metadata:
             # Merge all pending Arabic lines
             merged_ar = merge_arabic_lines("\n".join(pending_ar))
             
             if merged_ar:
+                if len(pending_ar) > 1:
+                    merged_arabic_count += 1
+                    logger.debug(f"normalize_ocr_blocks: Flushing {len(pending_ar)} merged Arabic blocks (page={pending_metadata['pageNumber']})")
                 normalized_blocks.append({
                     "pageNumber": pending_metadata["pageNumber"],
                     "type": pending_metadata["type"],
@@ -289,8 +305,11 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     
     for page in pages:
         page_number = page.get("pageNumber", 0)
+        page_blocks = page.get("blocks", [])
+        logger.debug(f"normalize_ocr_blocks: Processing page {page_number} with {len(page_blocks)} blocks")
         
-        for block in page.get("blocks", []):
+        for block_idx, block in enumerate(page_blocks):
+            total_blocks += 1
             block_type = block.get("type", "paragraph")
             content = block.get("content", {})
             chapter = block.get("chapter")
@@ -301,6 +320,8 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             
             # Skip empty blocks
             if not ar and not en:
+                skipped_blocks += 1
+                logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Skipped (empty)")
                 continue
             
             # Tables: Keep as-is (already in markdown from Phase 1)
@@ -318,6 +339,7 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     "chapter": chapter,
                     "section": section,
                 })
+                logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Added table block (ar_len={len(ar) if ar else 0})")
                 continue
             
             # TOC: Keep as-is (no normalization needed)
@@ -334,22 +356,26 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     "chapter": chapter,
                     "section": section,
                 })
+                logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Added TOC block")
                 continue
             
             # Headers: Process but don't merge across blocks
             if block_type == "header":
                 flush_pending_arabic()
                 
+                norm_ar = normalize_arabic_ocr(ar) if ar else None
+                norm_en = normalize_english_ocr(en) if en else None
                 normalized_blocks.append({
                     "pageNumber": page_number,
                     "type": "header",
                     "content": {
-                        "ar": normalize_arabic_ocr(ar) if ar else None,
-                        "en": normalize_english_ocr(en) if en else None
+                        "ar": norm_ar,
+                        "en": norm_en
                     },
                     "chapter": chapter,
                     "section": section,
                 })
+                logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Added header block (ar_len={len(norm_ar) if norm_ar else 0}, en_len={len(norm_en) if norm_en else 0})")
                 continue
             
             # Paragraphs: Accumulate Arabic for merging, process English separately
@@ -371,6 +397,7 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                         "chapter": chapter,
                         "section": section,
                     })
+                    logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Added English block (en_len={len(normalized_en)})")
             
             # Accumulate Arabic for merging
             if ar:
@@ -384,6 +411,7 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                         pending_metadata.get("chapter") != chapter or
                         pending_metadata.get("section") != section
                     ):
+                        logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Metadata changed, flushing pending Arabic")
                         flush_pending_arabic()
                     
                     # Accumulate
@@ -394,9 +422,11 @@ def normalize_ocr_blocks(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                         "chapter": chapter,
                         "section": section,
                     }
+                    logger.debug(f"normalize_ocr_blocks: Page {page_number}, Block {block_idx}: Accumulated Arabic (pending_count={len(pending_ar)})")
     
     # Flush any remaining Arabic
     flush_pending_arabic()
     
+    logger.info(f"normalize_ocr_blocks: OCR normalization complete - {len(normalized_blocks)} blocks normalized ({skipped_blocks} skipped, {merged_arabic_count} Arabic merges)")
     return normalized_blocks
 

@@ -4,8 +4,12 @@ Application use cases for the PDF processing feature.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import List
+
+# Setup logger for this module
+logger = logging.getLogger(__name__)
 
 from features.process.infrastructure.pdf_structured_extractor_pymupdf import (
     extract_structured_pdf,
@@ -44,11 +48,16 @@ class ExtractPdfUseCase:
     """
 
     def execute(self, request: ExtractPdfRequestDTO) -> ExtractPdfResponseDTO:
+        logger.info(f"ExtractPdfUseCase.execute: Starting extraction for '{request.pdf_path}'")
         # Phase 1: structured extraction
+        logger.info("ExtractPdfUseCase.execute: Phase 1 - Structured extraction")
         structured_pages = extract_structured_pdf(request.pdf_path)
+        logger.info(f"ExtractPdfUseCase.execute: Phase 1 complete - {len(structured_pages)} pages extracted")
 
         # Phase 2: bilingual normalization
+        logger.info("ExtractPdfUseCase.execute: Phase 2 - Bilingual normalization")
         normalized_blocks_dicts = normalize_phase2_from_pages(structured_pages)
+        logger.info(f"ExtractPdfUseCase.execute: Phase 2 complete - {len(normalized_blocks_dicts)} blocks normalized")
 
         # Map into DTOs with bilingual content structure
         blocks: List[NormalizedBlockDTO] = []
@@ -95,6 +104,19 @@ class ChunkingUseCase:
     chunker: IChunker
 
     def execute(self, request: ChunkingRequestDTO) -> ChunkingResponseDTO:
+        logger.info("=" * 80)
+        logger.info("CHUNKING USE CASE: Starting")
+        logger.info("=" * 80)
+        logger.info(f"ChunkingUseCase.execute: Starting chunking - {len(request.blocks)} blocks, max_chars={request.max_chars}")
+        
+        # Count blocks by type
+        block_types = {}
+        for block_dto in request.blocks:
+            block_type = block_dto.type
+            block_types[block_type] = block_types.get(block_type, 0) + 1
+        
+        logger.info(f"ChunkingUseCase.execute: Block type distribution: {block_types}")
+        
         # Convert DTOs to dicts for chunking function
         blocks_dicts = []
         for block_dto in request.blocks:
@@ -106,15 +128,28 @@ class ChunkingUseCase:
                 "section": block_dto.section,
             })
         
+        logger.debug(f"ChunkingUseCase.execute: Converted {len(blocks_dicts)} blocks to dicts")
+        
         # Phase 3: Chunk with rules enforcement (via interface)
+        logger.info("ChunkingUseCase.execute: Phase 3 - Chunking blocks")
         chunks_dicts = self.chunker.chunk_blocks(
             blocks=blocks_dicts,
             document_name=request.document_name,
             year=request.year,
-            max_tokens=request.max_tokens,
-            min_tokens=request.min_tokens,
-            overlap_tokens=request.overlap_tokens,
+            max_chars=request.max_chars,
+            min_chars=request.min_chars,
+            overlap_chars=request.overlap_chars,
         )
+        logger.info(f"ChunkingUseCase.execute: Phase 3 complete - {len(chunks_dicts)} chunks created")
+        
+        # Summary report
+        logger.info("=" * 80)
+        logger.info("CHUNKING USE CASE: Summary")
+        logger.info("=" * 80)
+        logger.info(f"Input blocks: {len(request.blocks)}")
+        logger.info(f"Output chunks: {len(chunks_dicts)}")
+        logger.info(f"Conversion ratio: {len(chunks_dicts) / len(request.blocks) * 100:.1f}% (chunks per block)")
+        logger.info("=" * 80)
 
         # Convert to DTOs
         chunks: List[ChunkDTO] = []
@@ -184,25 +219,32 @@ class ExtractOcrFullPipelineUseCase:
         Returns:
             ChunkingResponseDTO with validated chunks ready for embedding
         """
+        logger.info(f"ExtractOcrFullPipelineUseCase.execute: Starting OCR pipeline for '{request.pdf_path}' (max_pages={request.max_pages}, ocr_dpi={request.ocr_dpi})")
         # Phase 1 OCR: Extract with pdfplumber + Tesseract
+        logger.info("ExtractOcrFullPipelineUseCase.execute: Phase 1 OCR - Extraction")
         ocr_pages = extract_structured_pdf_ocr(
             request.pdf_path,
             max_pages=request.max_pages,
             ocr_dpi=request.ocr_dpi
         )
+        logger.info(f"ExtractOcrFullPipelineUseCase.execute: Phase 1 OCR complete - {len(ocr_pages)} pages extracted")
         
         # Phase 2 OCR: Normalize OCR artifacts and merge split paragraphs
+        logger.info("ExtractOcrFullPipelineUseCase.execute: Phase 2 OCR - Normalization")
         normalized_blocks_dicts = normalize_ocr_blocks(ocr_pages)
+        logger.info(f"ExtractOcrFullPipelineUseCase.execute: Phase 2 OCR complete - {len(normalized_blocks_dicts)} blocks normalized")
         
         # Phase 3: Chunk (reuse existing chunker via interface)
+        logger.info("ExtractOcrFullPipelineUseCase.execute: Phase 3 - Chunking")
         chunks_dicts = self.chunker.chunk_blocks(
             blocks=normalized_blocks_dicts,
             document_name=request.document_name,
             year=request.year,
-            max_tokens=request.max_tokens,
-            min_tokens=request.min_tokens,
-            overlap_tokens=request.overlap_tokens,
+            max_chars=request.max_chars,
+            min_chars=request.min_chars,
+            overlap_chars=request.overlap_chars,
         )
+        logger.info(f"ExtractOcrFullPipelineUseCase.execute: Phase 3 complete - {len(chunks_dicts)} chunks created")
 
         # Convert to DTOs
         chunks: List[ChunkDTO] = []

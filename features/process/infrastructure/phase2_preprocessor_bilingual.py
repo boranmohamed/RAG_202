@@ -23,11 +23,15 @@ Output format (flattened per block, preserving pageNumber & type):
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, Iterable, List, Literal, Optional
 
 import json
 import re
+
+# Setup logger for this module
+logger = logging.getLogger(__name__)
 
 # ChunkWise imports (with fallback if not available)
 # Based on ChunkWise GitHub: https://github.com/h9-tec/ChunkWise
@@ -428,11 +432,13 @@ def _normalize_block_text(text: str, block_type: BlockType) -> str:
     - Paragraph/toc/footer: full normalization
     """
     if not text:
+        logger.debug(f"_normalize_block_text: Empty text for block_type={block_type}")
         return ""
 
     # TABLE SAFETY RULE: do not modify content.
     # This is CRITICAL - tables must never be normalized to preserve numbers.
     if block_type == "table":
+        logger.debug(f"_normalize_block_text: Table block - skipping normalization (preserving {len(text)} chars)")
         return text
 
     # TITLE SAFETY: keep titles essentially unchanged, except for very light
@@ -441,7 +447,9 @@ def _normalize_block_text(text: str, block_type: BlockType) -> str:
         # Only strip redundant surrounding whitespace and excessive internal spaces.
         cleaned = re.sub(r"[ \t]+", " ", text)
         lines = [ln.strip() for ln in cleaned.splitlines()]
-        return "\n".join(lines).strip()
+        result = "\n".join(lines).strip()
+        logger.debug(f"_normalize_block_text: Header block - light normalization ({len(text)} -> {len(result)} chars)")
+        return result
 
     # For other types (paragraph, toc, footer), apply full normalization pipeline
     lang = detect_language(text)
@@ -537,10 +545,13 @@ def _reconstruct_fragmented_paragraphs(blocks: List[Dict[str, Any]]) -> List[Dic
     This fixes the issue where line breaks are incorrectly treated as paragraph breaks.
     """
     if not blocks:
+        logger.debug("_reconstruct_fragmented_paragraphs: No blocks to process")
         return blocks
     
+    logger.debug(f"_reconstruct_fragmented_paragraphs: Starting with {len(blocks)} blocks")
     reconstructed: List[Dict[str, Any]] = []
     i = 0
+    merge_count = 0
     
     while i < len(blocks):
         current = blocks[i]
@@ -563,6 +574,8 @@ def _reconstruct_fragmented_paragraphs(blocks: List[Dict[str, Any]]) -> List[Dic
         
         # Merge all fragments into one block
         if len(fragments_to_merge) > 1:
+            merge_count += 1
+            logger.debug(f"_reconstruct_fragmented_paragraphs: Merging {len(fragments_to_merge)} fragments (pages: {[b.get('pageNumber') for b in fragments_to_merge]})")
             merged = _merge_blocks(fragments_to_merge)
             reconstructed.append(merged)
         else:
@@ -570,6 +583,10 @@ def _reconstruct_fragmented_paragraphs(blocks: List[Dict[str, Any]]) -> List[Dic
         
         i = j
     
+    if merge_count > 0:
+        logger.info(f"_reconstruct_fragmented_paragraphs: Merged {merge_count} fragment groups, {len(blocks)} -> {len(reconstructed)} blocks")
+    else:
+        logger.debug(f"_reconstruct_fragmented_paragraphs: No fragments found, {len(blocks)} blocks unchanged")
     return reconstructed
 
 
@@ -640,13 +657,21 @@ def normalize_phase2_from_pages(
 
     Returns a flat list of normalized blocks with bilingual content structure.
     """
+    logger.info("normalize_phase2_from_pages: Starting Phase 2 normalization")
     normalized: List[Dict[str, Any]] = []
+    total_pages = 0
+    total_blocks = 0
+    skipped_blocks = 0
+    empty_blocks = 0
 
     for page in pages:
         page_number = int(page.get("pageNumber", 0))
         blocks = page.get("blocks") or []
+        total_pages += 1
+        logger.debug(f"normalize_phase2_from_pages: Processing page {page_number} with {len(blocks)} blocks")
 
-        for blk in blocks:
+        for blk_idx, blk in enumerate(blocks):
+            total_blocks += 1
             blk_type_str = blk.get("type", "paragraph")
 
             # Safely coerce to BlockType (falling back to paragraph)
@@ -655,6 +680,9 @@ def normalize_phase2_from_pages(
                 if blk_type_str in {"header", "paragraph", "table", "toc", "footer"}
                 else "paragraph"
             )
+            
+            if blk_type_str != blk_type:
+                logger.warning(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: Invalid type '{blk_type_str}', using '{blk_type}'")
 
             # Extract bilingual content from Phase 1 structure
             content_dict = blk.get("content", {})
@@ -663,24 +691,40 @@ def normalize_phase2_from_pages(
                 raw_en = content_dict.get("en") or ""
             else:
                 # Fallback for old structure (shouldn't happen, but be safe)
+                logger.warning(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: Invalid content structure, using empty strings")
                 raw_ar = ""
                 raw_en = ""
 
-            # Normalize Arabic text (if present)
-            norm_ar = None
-            if raw_ar:
-                norm_ar = _normalize_block_text(raw_ar, block_type=blk_type)
+            # Check if block is empty
+            if not raw_ar and not raw_en:
+                empty_blocks += 1
+                logger.debug(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: Empty block (type={blk_type})")
+                # Still create the block but with empty content
+                norm_ar = None
+                norm_en = None
+            else:
+                # Normalize Arabic text (if present)
+                norm_ar = None
+                if raw_ar:
+                    original_len = len(raw_ar)
+                    norm_ar = _normalize_block_text(raw_ar, block_type=blk_type)
+                    new_len = len(norm_ar) if norm_ar else 0
+                    logger.debug(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: Arabic normalized ({original_len} -> {new_len} chars)")
 
-            # Normalize English text (if present) - minimal normalization
-            norm_en = None
-            if raw_en:
-                # English gets minimal normalization (spacing only, no character changes)
-                if blk_type == "table":
-                    # Tables pass through untouched
-                    norm_en = raw_en
-                else:
-                    # Light spacing normalization for English
-                    norm_en = _normalize_spacing(raw_en)
+                # Normalize English text (if present) - minimal normalization
+                norm_en = None
+                if raw_en:
+                    # English gets minimal normalization (spacing only, no character changes)
+                    if blk_type == "table":
+                        # Tables pass through untouched
+                        norm_en = raw_en
+                        logger.debug(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: Table block - English text unchanged")
+                    else:
+                        # Light spacing normalization for English
+                        original_len = len(raw_en)
+                        norm_en = _normalize_spacing(raw_en)
+                        new_len = len(norm_en) if norm_en else 0
+                        logger.debug(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: English normalized ({original_len} -> {new_len} chars)")
 
             nb = NormalizedBlock(
                 pageNumber=page_number,
@@ -689,11 +733,22 @@ def normalize_phase2_from_pages(
                 chapter=blk.get("chapter"),  # Preserve from Phase 1
                 section=blk.get("section"),  # Preserve from Phase 1
             )
+            
+            if blk.get("chapter") or blk.get("section"):
+                logger.debug(f"normalize_phase2_from_pages: Page {page_number}, Block {blk_idx}: Preserved chapter='{blk.get('chapter')}', section='{blk.get('section')}'")
+            
             normalized.append(asdict(nb))
 
-    # Reconstruct fragmented paragraphs BEFORE returning
-    normalized = _reconstruct_fragmented_paragraphs(normalized)
+    logger.info(f"normalize_phase2_from_pages: Processed {total_pages} pages, {total_blocks} blocks ({empty_blocks} empty, {skipped_blocks} skipped)")
 
+    # Reconstruct fragmented paragraphs BEFORE returning
+    before_reconstruct = len(normalized)
+    normalized = _reconstruct_fragmented_paragraphs(normalized)
+    after_reconstruct = len(normalized)
+    if before_reconstruct != after_reconstruct:
+        logger.info(f"normalize_phase2_from_pages: Paragraph reconstruction: {before_reconstruct} -> {after_reconstruct} blocks")
+    
+    logger.info(f"normalize_phase2_from_pages: Phase 2 normalization complete - {len(normalized)} normalized blocks")
     return normalized
 
 
