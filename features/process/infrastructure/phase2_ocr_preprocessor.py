@@ -113,6 +113,10 @@ def normalize_arabic_ocr(text: str) -> str:
     if not text or not text.strip():
         return ""
     
+    # Do NOT clean markdown tables (we must keep pipes `|`, dashes, alignment, etc.)
+    if text.strip().startswith("|") and "|" in text:
+        return text
+    
     # Step 1: Apply comprehensive OCR cleaning (diacritics, control chars, numerals)
     text = clean_ocr_text(text)
     

@@ -72,6 +72,10 @@ def normalize_arabic(text: str) -> str:
     if not text:
         return ""
     
+    # Do NOT clean markdown tables (we must keep pipes `|`, dashes, alignment, etc.)
+    if text.strip().startswith("|") and "|" in text:
+        return text
+    
     # Remove tatweel (Arabic elongation character)
     text = text.replace("ـ", "")
     
@@ -137,6 +141,10 @@ def clean_ocr_text(text: str) -> str:
     """
     if not text:
         return ""
+    
+    # Do NOT clean markdown tables (we must keep pipes `|`, dashes, alignment, etc.)
+    if text.strip().startswith("|") and "|" in text:
+        return text
     
     # 1) Remove Unicode control chars
     text = ''.join(ch for ch in text if unicodedata.category(ch) not in ["Cc", "Cf"])

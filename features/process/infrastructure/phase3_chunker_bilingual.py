@@ -216,6 +216,8 @@ def strip_page_noise(content: Dict[str, Optional[str]]) -> Dict[str, Optional[st
     - Page numbers (Arabic and English)
     - Repeated bilingual book titles
     
+    CRITICAL: Never strip markdown table formatting (pipes, dashes, etc.)
+    
     Args:
         content: Dictionary with "ar" and "en" keys
         
@@ -224,6 +226,16 @@ def strip_page_noise(content: Dict[str, Optional[str]]) -> Dict[str, Optional[st
     """
     ar_text = content.get("ar") or ""
     en_text = content.get("en") or ""
+    
+    # Do NOT clean markdown tables (we must keep pipes `|`, dashes, alignment, etc.)
+    is_markdown_table = (ar_text.strip().startswith("|") and "|" in ar_text) or (en_text.strip().startswith("|") and "|" in en_text)
+    if is_markdown_table:
+        # For markdown tables, only remove page noise from non-table lines
+        # Preserve all table structure
+        return {
+            "ar": ar_text if ar_text else None,
+            "en": en_text if en_text else None,
+        }
     
     # Patterns to remove
     noise_patterns = [
@@ -1229,9 +1241,11 @@ def validate_chunk(chunk: Chunk, table_hashes: Optional[set] = None) -> bool:
             return False
     
     # Check minimum content length for narrative chunks
+    # Allow markdown tables even if short or symbolic
+    is_markdown = (ar_text.strip().startswith("|") and "|" in ar_text) or (en_text.strip().startswith("|") and "|" in en_text)
     if chunk.metadata.chunk_type == "narrative":
         total_length = len(ar_text) + len(en_text)
-        if total_length < 20:  # Too short
+        if total_length < 20 and not is_markdown:  # Too short (unless markdown table)
             logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - too short (length={total_length} < 20)")
             return False
     
@@ -1372,10 +1386,17 @@ def chunk_section_blocks(
             logger.debug(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Extracted content (ar={ar_len} chars, en={en_len} chars, chunk_text={len(chunk_text)} chars)")
             
             # Check if content extraction failed
+            # Allow markdown tables even if short or symbolic
+            is_markdown = chunk_text.strip().startswith("|") and "|" in chunk_text
             if not chunk_content.get("ar") and not chunk_content.get("en"):
-                logger.warning(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Content extraction failed - both ar and en are empty (chunk_text={len(chunk_text)} chars)")
-                invalid_blocks += 1
-                continue
+                if is_markdown:
+                    # Markdown table - bypass empty check, use chunk_text directly
+                    chunk_content = {"ar": chunk_text, "en": chunk_text}
+                    logger.debug(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Markdown table detected, bypassing empty check")
+                else:
+                    logger.warning(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Content extraction failed - both ar and en are empty (chunk_text={len(chunk_text)} chars)")
+                    invalid_blocks += 1
+                    continue
             
             # STRIP PAGE NOISE before classification
             cleaned_chunk_content = strip_page_noise(chunk_content)
@@ -1586,7 +1607,7 @@ def chunk_table_block(
                 page_start=table_block.get("pageNumber", 0),
                 page_end=table_block.get("pageNumber", 0),
                 chunk_type="table",
-                language=["ar", "en"] if (gov_content.get("ar") and gov_content.get("en")) else (["ar"] if gov_content.get("ar") else ["en"]),
+                language=["ar", "en"],  # Tables are language-agnostic, treat as bilingual universally
                 units=gov_metadata.get("units"),
                 data_year=gov_metadata.get("data_year"),
                 geography=gov_metadata.get("geography"),
@@ -1610,7 +1631,16 @@ def chunk_table_block(
         return summary_chunks + table_chunks
     
     # ENFORCE TABLE ATOMICITY: Only split if > 12,000 chars
-    if combined_size > MAX_TABLE_CHARS_FOR_SPLIT:
+    # Hard guarantee that even large markdown tables do NOT get dropped
+    is_markdown_table = " | " in ar_text or ar_text.strip().startswith("|")
+    
+    # For markdown tables, ALWAYS keep as single chunk (even if large)
+    # This preserves table structure and prevents formatting loss
+    if is_markdown_table and combined_size > MAX_TABLE_CHARS_FOR_SPLIT:
+        logger.warning(f"chunk_table_block: Large markdown table detected ({combined_size} chars), but keeping as single chunk to preserve structure")
+        # Continue to single chunk creation below (skip splitting)
+    
+    if combined_size > MAX_TABLE_CHARS_FOR_SPLIT and not is_markdown_table:
         logger.warning(f"chunk_table_block: Very large table detected ({combined_size} chars > {MAX_TABLE_CHARS_FOR_SPLIT}), splitting with fragments marked")
         # Split large table - mark fragments as table_fragment
         table_chunks: List[Chunk] = []
@@ -1631,7 +1661,7 @@ def chunk_table_block(
                     page_start=table_block.get("pageNumber", 0),
                     page_end=table_block.get("pageNumber", 0),
                     chunk_type="table_fragment",  # Mark as fragment
-                    language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+                    language=["ar", "en"],  # Tables are language-agnostic
                     units=table_metadata_dict.get("units"),
                     data_year=table_metadata_dict.get("data_year"),
                     geography=table_metadata_dict.get("geography"),
@@ -1666,7 +1696,7 @@ def chunk_table_block(
                 page_start=table_block.get("pageNumber", 0),
                 page_end=table_block.get("pageNumber", 0),
                 chunk_type="table_fragment",
-                language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+                language=["ar", "en"],  # Tables are language-agnostic
                 units=table_metadata_dict.get("units"),
                 data_year=table_metadata_dict.get("data_year"),
                 geography=table_metadata_dict.get("geography"),
@@ -1686,7 +1716,9 @@ def chunk_table_block(
         
         logger.warning(f"chunk_table_block: Split very large table into {len(table_chunks)} fragments (NONE will be embedded)")
         return summary_chunks + table_chunks
-    else:
+    
+    # Table fits in one chunk OR is markdown table (atomic table rule)
+    if combined_size <= MAX_TABLE_CHARS_FOR_SPLIT or is_markdown_table:
         # Table fits in one chunk - ATOMIC TABLE RULE
         logger.debug(f"chunk_table_block: Table fits in single chunk (atomic table)")
         table_content = {"ar": ar_text, "en": en_text}
@@ -1696,7 +1728,7 @@ def chunk_table_block(
             page_start=table_block.get("pageNumber", 0),
             page_end=table_block.get("pageNumber", 0),
             chunk_type="table",
-            language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+            language=["ar", "en"],  # Tables are language-agnostic, treat as bilingual universally
             units=table_metadata_dict.get("units"),
             data_year=table_metadata_dict.get("data_year"),
             geography=table_metadata_dict.get("geography"),

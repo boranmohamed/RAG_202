@@ -350,6 +350,10 @@ def _normalize_arabic_chars_basic(text: str) -> str:
     """
     if not text:
         return text
+    
+    # Do NOT clean markdown tables (we must keep pipes `|`, dashes, alignment, etc.)
+    if text.strip().startswith("|") and "|" in text:
+        return text
 
     # Alef variants
     text = re.sub(r"[أإآٱ]", "ا", text)

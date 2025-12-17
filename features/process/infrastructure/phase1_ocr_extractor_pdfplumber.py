@@ -239,6 +239,17 @@ def extract_tables_best(page: pdfplumber.page.Page) -> List[Dict[str, Any]]:
     all_tables = tables_lines if tables_lines else tables_text
     logger.debug(f"extract_tables_best: Page {page.page_number}: Combined {len(all_tables)} tables (using {'lines' if tables_lines else 'text'} strategy)")
     
+    # NEW FALLBACK: preserve original PDF order even if no table detected
+    if not all_tables:
+        try:
+            raw = page.extract_words(x_tolerance=3, y_tolerance=3)
+            lines = reconstruct_table_like_layout(raw)
+            if lines:
+                all_tables = [lines]
+                logger.info(f"extract_tables_best: Page {page.page_number}: Fallback textgrid reconstruction found {len(lines)} rows")
+        except Exception as e:
+            logger.debug(f"extract_tables_best: Page {page.page_number}: Fallback textgrid reconstruction failed: {e}")
+    
     for idx, t in enumerate(all_tables):
         # Clean cells
         cleaned = []
@@ -261,6 +272,61 @@ def extract_tables_best(page: pdfplumber.page.Page) -> List[Dict[str, Any]]:
 
     logger.info(f"extract_tables_best: Page {page.page_number}: Extracted {len(out)} valid tables")
     return out
+
+
+def reconstruct_table_like_layout(words: List[Dict[str, Any]]) -> Optional[List[List[str]]]:
+    """
+    Reconstruct table-like layout from extracted words.
+    
+    Heuristic: group words by y position → produce rows.
+    This is a fallback when pdfplumber fails to detect table structure.
+    
+    Args:
+        words: List of word dicts from page.extract_words()
+        
+    Returns:
+        List of rows (each row is a list of cell strings), or None if not table-like
+    """
+    if not words:
+        return None
+    
+    rows = []
+    current_row = []
+    last_y = None
+    
+    # Sort words by y position (top to bottom), then x position (left to right)
+    sorted_words = sorted(words, key=lambda w: (w.get("top", 0), w.get("left", 0)))
+    
+    for w in sorted_words:
+        word_text = w.get("text", "").strip()
+        if not word_text:
+            continue
+        
+        current_y = w.get("top", 0)
+        
+        if last_y is None:
+            last_y = current_y
+        
+        # If y position is close (within 3 pixels), same row
+        if abs(current_y - last_y) <= 3:
+            current_row.append(word_text)
+        else:
+            # New row
+            if current_row:
+                rows.append(current_row)
+            current_row = [word_text]
+            last_y = current_y
+    
+    # Add final row
+    if current_row:
+        rows.append(current_row)
+    
+    # Discard tiny non-table results
+    # Must have at least 2 rows and at least one row with more than 2 cells
+    if len(rows) >= 2 and any(len(r) > 2 for r in rows):
+        return rows
+    
+    return None
 
 
 def _classify_block_type(
@@ -439,10 +505,11 @@ def extract_blocks_ocr(
                 logger.debug(f"extract_blocks_ocr: Page {page_num}, Table {table_idx}: Converted to markdown ({len(md)} chars)")
                 
                 # Store both markdown and raw rows in bilingual format
-                # Tables don't have language separation - store as Arabic content
+                # Store markdown in BOTH ar and en to avoid being filtered by chunker
+                # Many chunker rules check if en_text exists
                 content = BilingualContent(
                     ar=md,  # Store markdown in ar field
-                    en=None
+                    en=md   # Store markdown also in english to avoid dropping
                 )
                 
                 page_blocks.append(PageBlock(
