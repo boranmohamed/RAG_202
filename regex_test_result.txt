@@ -1,0 +1,17 @@
+Testing regex patterns:
+
+[OK] chapter: 'Chapter 1 : General Information 27 ةـماـعلا تاموـل...'
+     Expected: 'General Information'
+     Got:      'General Information'
+
+[OK] chapter: 'Chapter 2 : Climate 39 خاـنــلام : 2 لــصفلا...'
+     Expected: 'Climate'
+     Got:      'Climate'
+
+[OK] section: 'Section 1 : Climate 41 خاــنلام : 1 مسقلا...'
+     Expected: 'Climate'
+     Got:      'Climate'
+
+[OK] section: 'Section 2 : Population 53 ناـكسلا : 2 مسقلا...'
+     Expected: 'Population'
+     Got:      'Population'

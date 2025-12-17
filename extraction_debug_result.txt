@@ -1,0 +1,65 @@
+Checking first 10 pages for headers and chapter/section metadata:
+
+Page 5: 6 headers
+  - chapter=None, section=None
+    AR: 9
+    EN: 
+  - chapter=None, section=None
+    AR: الـكـتـاب اإلحصـائـي السـنـويStatistical Year Book
+2 0 2 5
+    EN: 
+  - chapter=None, section=None
+    AR: CHAPTER - INDEXرقـم الصفحـة
+    EN: 
+  - chapter=None, section=None
+    AR: Page Noدليـــل الفصــــول
+    EN: 
+  - chapter=General Information, section=None
+    AR: Chapter 1 : General Information
+27 : املعلــومات العـامـة1 الفصــل
+    EN: 
+  - chapter=General Information, section=None
+    AR: CHAPTER - INDEX	ةـحفصلا مـقر
+Page No	لوـــصفلا لــيلد
+Chapter 1 : General Information	27	ةـماـعلا تاموـلعلام : 1 لـصفلا
+Geographical Features	31	ةــيفارغلاج لامعلام
+Governorate And Wilayat	37	تاـــيلوا لاو تاظفاحلام
+Chapter 2 : Climate	39	خاـنــلام : 2 لــصفلا
+Section 1 : Climate	41	خاــنلام : 1 مسقلا
+Chapter 3 : Population & Housing	51	ناكـسلاإو ناـكــسلا : 3 لــصفلا
+Section 2 : Population	53	ناـكسلا : 2 مسقلا
+Section 3 : Housing	71	ناـكسلاإ : 3 مسقلا
+Chapter 4 : Employment	85	ةـــلاــمـعـلا : 4 لــصفلا
+Section 4 : Employment	87	ةلامعلا : 4 مسقلا
+Chapter 5 : Agriculture & Fisheries	113	ةــيكمسلا ةورـثلاو ةــعارزلا : 5 لــصفلا
+Section 5 : Agriculture & Livestock	115	ةـيناويلاح ةورثلاو ةعارزلا : 5 مسقلا
+Section 6 : Fisheries	127	ةــيكمسلا ةورثلا : 6 مسقلا
+Chapter 6 : Energy & Mining	147	نداـــعلامو ةــــقاـطـلا : 6 لــصفلا
+Section 7 : Oil, Gas & Minerals	149	نداــعلامو زاغلاو طفنلا : 7 مسقلا
+Section 8 : Electricity & Water	165	هاــيلامو ءابرهكلا : 8 مسقلا
+Chapter 7 : Trade	179	ةراـــجتلا : 7 لــصفلا
+Section 9 : Enterprises & Establishments	181	تآشنلامو تاسسؤلام :9 مسقلا
+Section 10 : Foreign Trade	195	ةيجرالاخ ةراجتلا : 10 مسقلا
+Chapter 8 : Transport & Communications	219	تلاـصتلاو لـــقـنلا : 8 لــصفلا
+Section 11 : Transport	221	لــقنلا : 11 مسقلا
+Section 12 : Communications	239	تلاــصتلا : 12 مسقلا
+Chapter 9 : Economy & Finance	249	لاـلامو داـصـتـقلا : 9 لــصفلا
+Section 13 : National Accounts	251	ةـيموقلا تاـباسلاح : 13 مسقلا
+Section 14 : Public Finance	283	ةـماعلا ةـيلالام : 14 مسقلا
+Section 15 : Financial Institution	303	ةـيلالام تاـسسؤلام : 15 مسقلا
+Section 16 : Price Index	321	راـعسللا ةيسايقلا ماقرلا : 16 مسقلا
+Chapter 10 : Services	333	تاـمدــخـلا : 10 لــصفلا
+Section 17 : Health	335	ةـحصلا : 17 مسقلا
+Section 18 : Education	353	مـيلـعتلا : 18 مسقلا
+Section 19 : Social Services, Security & Safety Services	379	ةملسا لاو نملاو ةيعاـمـتجلا تاـمدــلاخ : 19 مسقلا
+Section 20 : Information & Culture	397	ةفاقثلاو ملعا لا : 20 مسقلا
+Section 21 : Tourism	411	ةحايسلا : 21 مسقلا
+    EN: 
+  34 blocks have metadata
+  41 blocks have metadata
+  40 blocks have metadata
+  38 blocks have metadata
+  37 blocks have metadata
+  41 blocks have metadata
+
+Done

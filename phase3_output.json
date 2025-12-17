@@ -1,0 +1,2230 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p1_merged",
+      "content": {
+        "ar": "الكتاب ا\u0013حصائي السنوي2025\nالكتاب ا\u0013حصائي السنوي\nStatistical Year Book\n2025\nIssue 53 ا\u0015صدار\nاغسطس\nطس\n\nIssue 53\nAugust\n2025\nAug\n20\n\nالكتاب ا\u000fحصائي السنوي\nStatistical Year Book\n2025 Issue 53 ا\u0015صدار\nاغسطس Data 2024 بيانات\nالمعظم- صاحب الجاللة السلطان هيثم بن طارق المعظم- صاحب الجاللة السلطان قابوس بن سعيد\nه ثراه\nطيب الل\nه ورعاه\nحفظه الل",
+        "en": "August\n2025"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 1,
+        "page_end": 2,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p5_0",
+      "content": {
+        "ar": "Geographical Features\n31العال الغرافية\nGovernorate And Wilayat\n37الحافظات والواليات\nChapter 2 : Climate\n39 : الناخ2 الفصل\nSection 1 : Climate\n41 : الناخ1 القسم\nChapter 3 : Population & Housing\n51 : السكان واالسكان3 الفصل\nSection 2 : Population\n53 : السكان2 القسم\nSection 3 : Housing\n71 : االسكان3 القسم\nChapter 4 : Employment\n85 : العمالة4 الفصل",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 5,
+        "page_end": 5,
+        "chunk_type": "glossary",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": false
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p5_1",
+      "content": {
+        "ar": "85 : العمالة4 الفصل\nSection 4 : Employment\n87العمالة : 4 القسم\nChapter 5 : Agriculture & Fisheries\n113 : الزراعة والثروة السمكية5 الفصل\nSection 5 : Agriculture & Livestock\n115\n: الزراعة والثروة اليوانية5 القسم\nSection 6 : Fisheries\n127 : الثروة السمكية6 القسم\nChapter 6 : Energy & Mining\n147 : الطاقة والعادن6 الفصل\nSection 7 : Oil, Gas & Minerals",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 5,
+        "page_end": 5,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p5_2",
+      "content": {
+        "ar": "Section 7 : Oil, Gas & Minerals\n149 : النفط والغاز والعادن7 القسم\nSection 8 : Electricity & Water\n165\n: الكهرباء والياه8 القسم\nChapter 7 : Trade\n179 : التجارة7 الفصل\nSection 9 : Enterprises & Establishments\n181الؤسسات والنشات :9 القسم\nSection 10 : Foreign Trade\n195 : التجارة اخلارجية10 القسم\nChapter 8 : Transport & Communications",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 5,
+        "page_end": 5,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p5_3",
+      "content": {
+        "ar": "Chapter 8 : Transport & Communications\n219: النقل والتصالت 8 الفصل\nSection 11 : Transport\n221 : النقل11 القسم\nSection 12 : Communications\n239 : التصالت12 القسم\nChapter 9 : Economy & Finance\n249 : القتصاد والال9 الفصل\nSection 13 : National Accounts\n251 : السابات القومية13 القسم\nSection 14 : Public Finance\n283 : الالية العامة14 القسم",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 5,
+        "page_end": 5,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p5_4",
+      "content": {
+        "ar": "283 : الالية العامة14 القسم\nSection 15 : Financial Institution\n303 : الؤسسات الالية15 القسم\nSection 16 : Price Index\n321 : الرقام القياسية لالسعار16 القسم\nChapter 10 : Services\n333 : الخدمات10 الفصل\nSection 17 : Health\n335\n: الصحة17 القسم\nSection 18 : Education\n353 : التعليم18 القسم\nSection 19 : Social Services, Security & Safety Services\n379 379\n: اخلدمات الجتماعية والمن والسالمة19 القسم",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 5,
+        "page_end": 5,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p22_0",
+      "content": {
+        "ar": "Centigrade Temperature\nC°\n°م\nالرارة اللوية Millimetre\nmmملم\nمليمتر Square Meter\nM²\n²م\nمتر مربع Cubic Meter\nM³\n³م\nمتر مكعب Kilogram\nKgكجم\nكيلو جرام\nKilowatt per hour\nKw/hكيلوواط/ساعة Gallonجالون\nNot Available. .. .. .غري متوفر\nIn Thousand\n(000)\n)000(في اللف Percent\n%\n%النسبة اللوية NIL or Zero\n0\nال توجد بيانات\nGross Domestic Product",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 22,
+        "page_end": 22,
+        "chunk_type": "glossary",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": false
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p22_1",
+      "content": {
+        "ar": "0\nال توجد بيانات\nGross Domestic Product\nGDPالناتج الحلي المجايل\nGross National Product\nGNIالناتج القومي المجايل\nArab Gulf Co-operation Council\nG. C. C. جملس التعاون لدول اخلليج العريب Maximum\nMaxالعظمي Minmum\nMinالصغري\nNot Elsewhere Classified\nN. E. C. غ. م. س\nغري مصنف في مكان اخر\nMillion Standard Cubic Feet\nMMSCFمليون قدم مكعب Million\nMn. م",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 22,
+        "page_end": 22,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p22_2",
+      "content": {
+        "ar": "MMSCFمليون قدم مكعب Million\nMn. م\nمليون Number\nNo. عدد Barrels\nBBLبرميل\nStandard Intermational Trade Classification\nSITCالتصنيف الدويل للتجارة\nHarmonized System\nH. Sالنظام النسق\nBroad Economic Categories\nBECالقطاعات االقتصادية الستخدمة Quarter\nQRربع Total\nT. الملة\nRial Omani\nR. O. ر. ع\nريال عماين\nPetroleum Development of Oman",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 22,
+        "page_end": 22,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p22_3",
+      "content": {
+        "ar": "Petroleum Development of Oman\nP. D. O. تنمية نفط عمان\nOccidental of Oman\nOXYاوكسي\nاوكسيد انتال عمان\nJapex Oman Limited\nJAPEXجابكس\nجابكس عمان\nOman Oil Refineries and Petroleum Industrial Company\nORPICشركة النفط العمانية للمصايف والصناعات البترولية\nKindergarten\nK. G. ما قبل البتدائي\nMinistry of Health\nM. O. H. وزارة الصحة",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 22,
+        "page_end": 22,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p26_5",
+      "content": {
+        "ar": "العام. ويف حمافظة ظفار جند ان المناخ اكثر اعتدال. اما عن\nالمطار يف سلطنة عمان فهي قليلة وغري منتظمة بشكل عام ومع\nذلك ففي بعض الحيان هتطل امطار غزيرة، وتستثين من ذلك\nحمافظة ظفار حيث هتطل عليها امطار غزيرة ومنتظمة بني شهريGeographical Features Location:-\nThe Sultanate is bordered to Western South by the Republic",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 26,
+        "page_end": 26,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p27_3",
+      "content": {
+        "ar": "من االثار التارخيية مثل (ميناء مسهرام) واالثار الدينية (ضرحيي\nالنيب ايوب وهود عليهما السالم)، ويقوم اهلها بالزراعة وصيد المساكMuscat Governorate :\nThe Governorate consists of Six Wilayats : Muscat,\nMutrah, Al Amrat, Bawshar, As Seeb and Qurayyat. Main Towns: This is the capital of the Sultanate and hous of\nGovernorate\nand\nheadquarters\nof\nthe",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 27,
+        "page_end": 27,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p28_3",
+      "content": {
+        "ar": "اليت تتميز جبريان مياهها العذبة، وتعترب بوابة لعمان من جهة\nالغرب، حيدها من النوب والية عربي ومن الشرق والييت صحار\nوضنك اما من جهة الغرب فتحدها مدينة العني بدولة االماراتTaqah is also located on the coast, East of Salalah, at a\ndistance of 45 kms. and is an old historical city. This lies in the West of Salalah with Mina Salalah",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 28,
+        "page_end": 28,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p32_0",
+      "content": {
+        "ar": "Muscatمسقط Mutrahمطرح Al Amratالعامرات\nحمافظة مسقط- 1\n1- Muscat Governorate Bawsharبوشر As Seebالسيب Qurayyatقريات Salalahصاللة Taqahطاقة Mirbatمرباط Rakhyutرخيوت Thumraytمثريت\nحمافظة ظفار- 2\n2- Dhofar Governorate Dalkutضلكوت Al Mazunaالزيونة Muqshinمقشن\nShalim Wa Juzur Al Hallaniyatشليم وجزر الالنيات Sadhسدح Khasabخصب Daba\nدبا\nحمافظة مسندم- 3",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 32,
+        "page_end": 32,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p32_1",
+      "content": {
+        "ar": "دبا\nحمافظة مسندم- 3\n3- Musandam Governorate Bukhaخباء Madhaمدحاء Al Buraymiالربميي\nحمافظة الربميي- 4\n4- Al-Buraymi Governorate\nMahdah\nحمظة Al Sinainahالسنينة Nizwaنزوي Jabal Al-Akhdharالبل االخضر Bahlaهبالء Manahمنح\nحمافظة الداخلية- 5\n5- Ad Dakhiliyah Governorate Al Hamraالمراء Adamادم",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 32,
+        "page_end": 32,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p33_0",
+      "content": {
+        "ar": "Soharصحار Shinasشناص Liwaلوي\nحمافظة مشال الباطنة- 6\n6- Al Batinah North Governorate Sahamصحم Al Khaburahاخلابورة As Suwayqالسويق Ar Rustaqالرستاق Al Awabiالعوايب Nakhalخنل\nحمافظة جنوب الباطنة- 7\n7- Al Batinah South Governorate Wadi Al Maawilوادي العاول Barkaبركاء Al Musanaahالصنعة Surصور\nAl Kamil Wa Al Wafiالكال والوايف",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 33,
+        "page_end": 33,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p33_merged",
+      "content": {
+        "ar": "Al Kamil Wa Al Wafiالكال والوايف\nJaalan Bani Bu Hasanجعالن بين بو حسن\nحمافظة جنوب الشرقية- 8\n8- Ash Sharqiyah South Governorate\nJaalan Bani Bu Aliجعالن بين بو علي Masirahمصرية Ibraابراء Al Mudaybiالضييب Bidiyahبدية\nحمافظة مشال الشرقية- 9\n9- Ash Sharqiyah North Governorate Al Qabilالقابل Wadi Bani Khalidوادي بين خالد\n\nDima Wa At Taiyyinدماء والطائيني Sinawسناو Ibriعربي\nحمافظة الظاهرة- 10\n10- Adh Dhahirah Governorate\nYanqulينقل Dankضنك Haymaهيماء",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 33,
+        "page_end": 33,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p47_0",
+      "content": {
+        "ar": "•\n\nاخنفض معدل وفيات االطفال دون سن اخلامسة في سلطنة\n202م3 حالة وفاة لكل الف مولود حي في عام10. 8 عمان من 202م4 حالة وفاة لكل الف مولود حي في عام9. 9 ايل مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 47,
+        "page_end": 47,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p47_1",
+      "content": {
+        "ar": null,
+        "en": "•\n10. 8 deaths per thousand live births was the under-\nfive mortality rate in the Sultanate of Oman in 2023\ncompared with 9. 9 deaths per thousand live births in\n2024. For more detail about the topic please follow the Data\nportal:"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 47,
+        "page_end": 47,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p54_0",
+      "content": {
+        "ar": "2024 مسندم\nMusandam 27. 6\nشمال الباطنة\nمدحاءAL Batinah North\nالبريميMadha\n115. 6\nAL Buraymiجنوب الباطنة 16. 8\nAL Batinah South\nجزر الديمانيات106. 5\nJuzur Ad Dimaniyyat مسقط\nMuscat 374. 6\nالظاهرة\nADH Dhahirah 6. 8\nالداخلية\nAD Dakhliyahجنوب\nالشر قية\n17. 5\nASH Sharqiyah South 30. 7\nشمال الشرقية\nASH Sharqiyah North 15. 2 الوسطي\nAL Wusta 0. 7\nظفار",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 54,
+        "page_end": 54,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p54_0",
+      "content": {
+        "ar": null,
+        "en": "The limits is not authority on International and administrative boundaries.\nShown limits and dimensions of Governorates, Willayat and Populated Localities are set by National Centre for Statistics and Information for statistical purposes and are as\nsuch inaccurate and should not be relied upon officially."
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 54,
+        "page_end": 54,
+        "chunk_type": "narrative",
+        "language": [
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p59_0",
+      "content": {
+        "ar": "1, 000, 000 100, 000 200, 000 300, 000 400, 000 500, 000 600, 000 800, 000 900, 000 700, 000 0 مسقط\nMuscat ظفار\nDhofar مسندم\nMusandam البريمي\nAl-Buraymi الداخلية\nAd-Dakhliyah شمال الباطنة\nAL-Batinah\nNorth عمانيOmani\nوافدExpatriate جنوب الباطنة\nAL-Batinah\nSouth\nالسكان حسب\nالجنسية و المحافظات\nPopulation by Governorate & Nationality\n2024",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 59,
+        "page_end": 59,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p61_3",
+      "content": {
+        "ar": "202م في حمافظة ظفار بنحو4 اكثر االراضي المنوحة في عام\nتليها حمافظيت مشال الباطنة وجنوب الباطنة بنحو%19. 4 علي التوايل%13. 1 و%14. 2\n•، 202م هي اراضي سكنية4 من االراضي المنوحة في عام%100 .5 الف قطعة عن العام السابق181 باخنفاض بلغ",
+        "en": "This section presents statistics and indicators related to the\nland use in the Sultanate such as the number of planned,"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 61,
+        "page_end": 61,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p74_merged",
+      "content": {
+        "ar": "202م4 من الشتغلني في سلطنة عمان خالل عام%34. 7\nيعملون في حمافظة%1. 58 يعملون في حمافظة مسقط، و مشال الباطنة",
+        "en": "This section highlights employment indicators in the group, education status and governorates. - National Records Center Main Results:\n•\n2. 7 million was the total number of employment in\n2024, increased by 0. 5% compared to the previous\n\nIntroduction:\ngovernment (not include the security sector) and private\nsectors. It also addresses the unemployment rate by age\nSources of Data:"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 74,
+        "page_end": 76,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p77_merged",
+      "content": {
+        "ar": "معدل الباحثني عن عمل حيملون مؤهل دبلوم التعليم%8. 3 حيملون مؤهل البكالوريوس%6. 9 202م، و4 العايل في عام يشمل القطاع اخلاص واالهلي واخري¹\n¹ includes Private, Communal and Other Sectors Sectors مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات\n\nالفصل الخامس\nChapter Five\nالزراعة والثروة السمكية\nAgriculture & Fisheries\nالزراعة والثروة الحيوانية\nAgriculture & Livestock القسم\nSection\n5",
+        "en": "•\nOmanis constituted about 90. 2% of the total\nemployment in the government sector during 2024,"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 77,
+        "page_end": 100,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p102_4",
+      "content": {
+        "ar": "الف امجايل عدد شتالت الفاكهة اليت مت توزيعها علي68، 202م4 الزارعني عن طريق مراكز التنمية الزراعية في عام ، مقارنة بالعام السابق%٥٫٢٢ مرتفعا بنحو",
+        "en": "- Ministry of Agriculture and Fisheries Wealth and Water\nResources. Main Results:\n•\n312 thousand acres is the total cultivated area in the\nSultanate of Oman, with an increase of 6. 5% in 2024"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 102,
+        "page_end": 102,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p103_1",
+      "content": {
+        "ar": "202م مت حتصينها4 من امجايل اليوانات في عام%45. 5\nمت حتصينها ضد%27. 7 ضد امراض التسمم العوي، و طاعون جمترات صغريه مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات",
+        "en": "•\n3. 7 million Animals were treated in the Sultanate of\nOman in 2024, with an decrease of 7. 3% compared to\nthe previous year.\n•\n18. 7% was the increase in the number of animals"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 103,
+        "page_end": 103,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p112_4",
+      "content": {
+        "ar": "اخنفاض في امجايل االنتاج السمكي من الصيد الريف%1. 9 202م مقارنة بالعام السابق4 في عام\n•\n\nمن انتاج سلطنة عمان%3. 27 تساهم حمافظة الوسطي بنحو\n202م، وتايت حمافظة جنوب4 من الصيد الريف في عام\n\nFisheries\nThis section highlights some of the fisheries indicators\nin the Sultanate of Oman, mainly the total production of",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 112,
+        "page_end": 112,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p114_2",
+      "content": {
+        "ar": "من امجايل كمية صادرات االمساك الطازجة الصدرة ايل%66\n202م تصدر ايل دولة4 دول جملس التعاون اخلليجي في عام االمارات العربية التحدة مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات",
+        "en": "•\n417 tons was the increase in the total fish production\nfrom aquaculture in 2024 with an increase of 8. 19%\ncompared to the previous year.\n•"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 114,
+        "page_end": 114,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p118_0",
+      "content": {
+        "ar": "المجموع\nالكلي االستزراع\nالسالي\nالتجاري 4-6\nالصيد الحرفي والسالي والتجاري واالستزراع السمكي\n:\nكمية االنتاج\n(\nبالطن\n)\nحسب المحافظة وطرق الصيد\nArtisanal, Coastal, Commercial Fishery & Aquaculture: Total Landing (ton) by Governorate and Sector.\n2024 Tonطن\nاالجمالي\nالوسطي\nجنوب الشرقية⁽¹⁾ الباطنة\nمسندم\nظفار\nمسقط\nالنوعAquaculture\nCoastal\nComercial",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p118_1",
+      "content": {
+        "ar": "مسقط\nالنوعAquaculture\nCoastal\nComercial\nArtisanal Fishery\nالصيد الحرفي\nالمحافظة\nSmall Pelagics\nاسماك سطحية صغيرة\nKawakawa\n4, 303 - - 1 4, 302 64 563 1, 920 292 363 1, 100 صدة\nIndian Mackerel\n98, 258 - 36, 620 - 61, 637 29, 364 22, 818 2, 842 1, 128 3, 454 2, 031 ضلعة\nSardine\n199, 262 - 702 - 198, 560 92, 346 65, 141 9, 156 473 27, 025 4, 420 عومة",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p118_2",
+      "content": {
+        "ar": "Subtotal\n241, 321 - 21, 007 17, 204 203, 110 39, 284 75, 149 30, 124 14, 881 24, 992 18, 681\nاجمالي\nStriped bonitto\n517 - 261 26 230 24 89 57 4 31 26 سقطانة\nSmall Jacks\n122, 055 - 20, 510 48, 471 53, 075 16, 808 22, 119 7, 371 2, 652 114 4, 012 صال صغير\nSkipjack\n6, 906 - - 6, 804 102 - 3 67 2 - 30 حقيبة\nCobia\n478 - - - 478 25 66 212 36 2 137 سكل",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p118_3",
+      "content": {
+        "ar": "478 - - - 478 25 66 212 36 2 137 سكل\nBig Pelagicsاالسماك السطحية الكبيرة\nLarge Jacks\n25, 625 - 64 1 25, 560 4, 210 8, 561 3, 411 2, 220 5, 300 1, 859 صال كبير\nAnchovy\n19, 903 - - - 19, 903 - 1 14, 985 2, 479 452 1, 986 برية\nFrigate tuna\n5, 492 - 0 21 5, 471 - 4, 163 673 73 8 555 تبانة\nQueenfish",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p118_5",
+      "content": {
+        "ar": "Mullets\n11, 890 - 1, 257 - 10, 634 3, 612 2, 642 126 53 4, 097 105 بياح\nKingfish\n8, 851 - - - 8, 851 3, 945 3, 149 518 781 135 324 كنعد\nOther:\n1, 160 - - - 1, 160 340 422 216 86 - 94 اخري\nOther\n17, 507 - 13 8, 179 9, 314 344 5, 325 1, 432 466 132 1, 614 اخري\nSubtotal:",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p118_merged",
+      "content": {
+        "ar": "Subtotal:\n453, 994 - 59, 089 48, 471 346, 434 142, 493 113, 159 34, 819 8, 102 35, 142 12, 719 االجمالي\nYellowfin tuna\n87, 560 - 7, 381 1, 404 78, 775 15, 370 32, 664 7, 444 788 17, 316 5, 192 جيذر\nOther tuna\n38, 197 - 8, 520 269 29, 409 12, 421 16, 658 140 107 47 36 تونات اخري\nNeedlefish\n1, 466 - - - 1, 466 23 17 124 1, 230\n- 72 خرخور",
+        "en": "- 72 خرخورTotal\nTotal\nAl Wusta\nAsh Sharqiyah\nSouth\nAl Batinah\nMusandam\nDhofar\nMuscat\nKind\nGovernorate"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p119_0",
+      "content": {
+        "ar": "المجموع\nالكلي تابع6\n-\n4.\nContd\nاالستزراع\nالسالي\nالتجاري\nاالجمالي\nالوسطي\nجنوب الشرقية⁽¹⁾ الباطنة\nمسندم\nظفار\nمسقط",
+        "en": "Total\nTotal\nAl Wusta\nAsh Sharqiyah\nSouth\nAl Batinah Musandam\nDhofar\nMuscat\nAquaculture\nCoastal\nComercial"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 119,
+        "page_end": 119,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p119_0",
+      "content": {
+        "ar": "Artisanal Fishery الصيد الحرفي\nالمحافظة\nRibbonfish\n10, 794 - 866 16 9, 912 4, 329 1, 814 356 112 3, 164 138 صفلق\nRabbitfish\n5, 333 - 50 - 5, 283 1, 642 1, 989 75 167 1, 388 22 صافي\nCrocker\n15, 108 - 8 - 15, 100 8, 459 3, 885 21 1 2, 727 7 صارف\nAbalone⁽²⁾\n76 - - - 76 - - - - 76 -\n⁽²⁾صفيلح\nSubtotal",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 119,
+        "page_end": 119,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p119_1",
+      "content": {
+        "ar": "⁽²⁾صفيلح\nSubtotal\n26, 487 3, 419 10, 591 1, 661 10, 816 4, 546 2, 385 1, 604 149 1, 898 234 االجمالي.\nUnidentified Fish'sاسماك غير معروفة\nOther\n13, 303 498 7, 915 - 4, 890 2, 018 1, 511 492 34 483 350 اخري.\nTonطن\nDemersal\nالسماك القاعيه\nEmperor\n15, 488 - 602 4 14, 882 4, 712 1, 497 1, 731 777 5, 396 769 شعري\nJobfish",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 119,
+        "page_end": 119,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p119_2",
+      "content": {
+        "ar": "Jobfish\n1, 405 - - - 1, 405 652 440 106 1 127 78 عندق\nSeabream\n18, 670 1, 590 1, 954 - 15, 126 6, 271 1, 966 782 207 5, 590 311 كوفر\nCatfish\n18, 701 - 6, 799 - 11, 903 6, 400 4, 400 378 77 461 187 جام\nSweetlips\n6, 372 - 119 - 6, 253 2, 332 1, 763 1, 048 145 512 452 نجرور\nShrimp\n5, 188 3, 419 - - 1, 769 1, 279 486 3 1 - 0 ربيان\nCuttlefish",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 119,
+        "page_end": 119,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p119_3",
+      "content": {
+        "ar": "Cuttlefish\n20, 492 - 10, 591 1, 661 8, 239 2, 846 1, 802 1, 599 142 1, 620 230 حبار\nSnapper\n24, 261 - - - 24, 261 251 115 954 21, 669 1, 087 185 حمراء\nRays\n1, 712 - 96 - 1, 616 96 79 938 49 0 454 طباق\nSubtotal'\n9, 331 - 110 2 9, 219 1, 359 2, 162 1, 929 705 2, 088 976 االجمالي'\nCrustaceans\nقشريات و رخويات\nLobster",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 119,
+        "page_end": 119,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p119_4",
+      "content": {
+        "ar": "Crustaceans\nقشريات و رخويات\nLobster\n732 - - - 732 421 97 2 6 202 4 شارخة\nOther::\n34, 333 - 24, 537 1, 112 8, 684 1, 642 1, 451 2, 618 356 1, 816 800 اخري::\nSubtotal::\n156, 194 1, 590 34, 968 1, 132 118, 504 37, 237 19, 700 9, 713 24, 584 24, 108 3, 163 االجمالي::\nSharks & Rays\nقرشيات\nSharks",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 119,
+        "page_end": 119,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p133_0",
+      "content": {
+        "ar": ". مليار قدم مكعب في العام السابق1, 908 بنحو\n•\n\nمن امجايل استخدامات الغاز الطبيعي في سلطنة عمان%51. 4 202م من نصيب الشاريع الصناعية4 في عام مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 133,
+        "page_end": 133,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p133_1",
+      "content": {
+        "ar": null,
+        "en": "•\n51. 4% of the total uses of natural gas in the Sultanate\nof Oman in 2024 was used in Industrial projects. For more detail about the topic please follow the Data\nportal:"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 133,
+        "page_end": 133,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p146_4",
+      "content": {
+        "ar": "الخنفاض في امجايل الستهالك الكومي من الكهرباء%2. 0\nالف3. 3 202م مقارنة بالعام السابق، ليصل ايل حنو4 في عام جيجاوات/ساعة",
+        "en": "This section deals with various indicators of electricity\nand water in the Sultanate of Oman, such as electricity\nand water production, installed capacity power station,\nelectric power consumed and its distribution according to"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 146,
+        "page_end": 146,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p147_0",
+      "content": {
+        "ar": null,
+        "en": "Introduction:\nData Sources:\n- Authority for Public Services Regulation.\n•\nAl Batinah North and South governorates had\n40. 2% of the total installed capacity power station\nin the Sultanate of Oman in 2024, followed by Ash"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 147,
+        "page_end": 147,
+        "chunk_type": "narrative",
+        "language": [
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p148_1",
+      "content": {
+        "ar": "الف امجايل عدد توصيالت الياه في سلطنة عمان في829. 1 مقارنة بالعام السابق%. 28 202م، مرتفعا بنسبة4 عام\n•\n\n202م تتركز4 من امجايل عدد توصيالت الياه في عام%40. 0 في حمافظة مسقط مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات\n\n•\n31. 0% of the electricity connections in the Sultanate of\nOman at the end of 2024 were in Muscat governorate.\n•",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 148,
+        "page_end": 148,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p158_3",
+      "content": {
+        "ar": "نسبة الؤسسات الصغري من امجايل الؤسسات%87. 8\n%14. 2 202م مرتفعة بنحو4 النشطة في سلطنة عمان لعام 202م3 العام عن\n•\n\nمن امجايل الؤسسات النشطة في سلطنة عمان تتمركز%70. 0، في ثالث حمافظات (حمافظة مسقط، حمافظة ظفار 202م4 حمافظة مشال الباطنة) في عام\n\nTrade\nEnterprises and\nEstablishments\nThis section highlights The Enterprises and Establishments",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 158,
+        "page_end": 158,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p193_0",
+      "content": {
+        "ar": "اخري\nOthers\n33. 3% اسيا\nAsia\n31. 4%\nمصنوعات متنوعة\nMisc. Manuf.\n5. 6% امريكا\nAmerica\n7. 0% اخري\nOthers\n3. 5%\nاوروبا الغربية\nWestern Europe\n7. 7%\nالالت ومعدات النقلMach. &\nTransp. Equip.\n24. 2%\nاالغذية والحيوانات الحيةFood\n& Live Animal\n11. 5%\nالبضائع المصنوعة\nManuf. Goods\n14. 5%\nالواردات السلعية المسجلة حسب اقسام التصنيف الدولي للتجارة المعدل(\n4\n)",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 193,
+        "page_end": 193,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p193_1",
+      "content": {
+        "ar": "4\n)\nRecorded Merchandise Imports by SITC Rev. 4\n2023\nالواردات السلعية المسجلة حسب المنطقة المستورد منها\nRecorded Merchadise Imports by Region\n2024\nالدول العربية\nArab Countries\n50. 5%\nالمواد الكيماويةChemicals\n10. 9%",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 193,
+        "page_end": 193,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p198_1",
+      "content": {
+        "ar": "مليون امجايل الركبات السجلة في سلطنة عمان خالل1. 8 مقارنة بالعام السابق%2. 5 202م، مرتفعة بنحو4 عام مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات",
+        "en": "• 7349 kilometers of roads executed in 2024, compared to\n1673 kilometers in 2023.\n• 16% of the roads executed in the Sultanate of Oman\nduring 2024 were Single, 1% Dual, and 83% Graded."
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 198,
+        "page_end": 198,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p209_merged",
+      "content": {
+        "ar": "9 - 11\n2024\n2023 (000 متر طن )\n(000 برميل)\n(000 متر طن )\n(000 برميل)\nالسفن الراسية والنفط المشحون والمنتجات النفطية المفرغة في ميناء الفحل حسب الشهر\nShiploads, loaded oil and refined petroleum products in Mina al-Fahal by month\nمنتجات نفطية مفرغة\nالنفط المشحون\nالسفن الراسية\nمنتجات نفطية مفرغة\nالنفط المشحون\nالسفن الراسية",
+        "en": "Oil Products\nunloaded\nOil Loaded\nVessels\nOil Products\nunloaded\nOil Loaded\nVessels\n(000 MT)\n(000 BBL)\n(000 MT)\n(000 BBL)"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 209,
+        "page_end": 209,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p209_0",
+      "content": {
+        "ar": "Total\n-\n350, 346\n229\n-\n341, 826\n235الجملة\nMay\n-\n28, 752\n19\n-\n28, 483\n21 مايو\nJuly\n-\n28, 494\n20\n-\n31, 381\n23 يوليو\nNovember\n-\n31, 356\n20\n-\n32, 033\n24 نوفمبر\nJune\n-\n26, 543\n18\n-\n23, 834\n16 يونيو\nOctober\n-\n27, 024\n17\n-\n28, 707\n18 اكتوبر\nMarch\n-\n29, 759\n20\n-\n28, 022\n20 مارس\nJanuary\n-\n29, 108\n18\n-\n27, 468\n21 يناير\nDecember\n-\n29, 892\n18\n-\n29, 343",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 209,
+        "page_end": 209,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p209_1",
+      "content": {
+        "ar": "December\n-\n29, 892\n18\n-\n29, 343\n19 ديسمبر\nSeptember\n-\n29, 366\n18\n-\n27, 367\n17 سبتمبر\nFebruary\n-\n31, 020\n19\n-\n27, 030\n17 فبراير\nApril\n-\n27, 538\n19\n-\n28, 073\n18 ابريل\nAugust\n-\n31, 493\n23\n-\n30, 086\n21 اغسطسMonth",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 209,
+        "page_end": 209,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p212_0",
+      "content": {
+        "ar": "Registered Type\n2024\n2023 نوع التسجيل No. عدد\nPrivate\n1, 396, 117\n1, 326, 587خاصة\nCommercial\n253, 895\n244, 486تجارية Rental\n39, 919\n33, 861تاجير Taxi\n28, 239\n27, 881اجرة\nGovernment\n11, 814\n11, 636حكومي\nDiplomatic\n917\n885هيئات سياسية\nDriving School\n5, 184\n5, 417تعليم السياقة\nTractors\n1, 254\n1, 270جرار زراعي\nMotorbikes\n7, 734\n7, 074دراجات الية\nTepm",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 212,
+        "page_end": 212,
+        "chunk_type": "glossary",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": false
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p212_1",
+      "content": {
+        "ar": "7, 734\n7, 074دراجات الية\nTepm\n(1)\n8, 799\n8, 296\nمؤقت(1)\nGrand Total\n1, 753, 872\n1, 667, 393االجمالي العام\n1\nاالرقام تستخدم لفترة بسيطة الغراض الفحص قبل التسجيل، كذلك تشمل مركبات\nالتصدير والستيراد1 - the numbers use for a short period due to the examination\npurpose before the registration, included the export and import\nvehicles",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 212,
+        "page_end": 212,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p213_4",
+      "content": {
+        "ar": "مليون امجايل عدد اشتراكات اهلواتف التنقلة في سلطنة7. 0 • مقارنة بالعام السابق%3. 5 202م، مرتفعا بنسبة4 عمان في عام\nمليون ميجابايت امجايل السعة الدولية لالنترنت في سلطنة3. 6 •This section deals with several indicators related to\ntelecommunication sector in the Sultanate of Oman such\nas the number of fixed phone lines, mobile telephones and",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 213,
+        "page_end": 213,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p220_0",
+      "content": {
+        "ar": "Subscriptions\n2024\n2023االشتراكات No. عدد.\nFixed line subscriptions\nاشتراكات الخط الثابت\nAnalogue Fixed Telephone Lines\n66, 720\n84, 514خطوط الهاتف الثابت التماثلية\nPublic Telephone - Payphone\n127\n6, 801\nالهواتف العمومية\nISDN Channels ( Equivalent DELs )\n49, 634\n49, 722 قنوات الشبكة الرقمية للخدمات المتكالة\nVoIP Subscription\n318, 478\n296, 869",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 220,
+        "page_end": 220,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p220_1",
+      "content": {
+        "ar": "VoIP Subscription\n318, 478\n296, 869\nالهاتف الثابت الموصلة بتقنية بروتوكول االنترنت(\nWLL Connection\n523\n703 خطوط الالسلكية\nTotal Fixed Telephones Lines\n435, 482\n438, 609 اجمالي خطوط الهاتف الثابت\nMobile Phone subscriptions\nاشتراكات الهاتف المتنقل\nMobile Phone Post-paid\n1, 238, 958\n1, 150, 392\nالهاتف المتنقل(\nاالجل الدفع)\nPre-paid mobile\n5, 114, 919",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 220,
+        "page_end": 220,
+        "chunk_type": "glossary",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": false
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p220_2",
+      "content": {
+        "ar": "Pre-paid mobile\n5, 114, 919\n5, 166, 698الهاتف المتنقل مدفوع القيمة مسبقا\nOperators\n3, 889, 244\n3, 902, 461مشغلين\nResellers\n1, 225, 675\n1, 264, 237\nاعادة البيع\nTotal Mobile Subscriptions\n6, 353, 877\n6, 317, 090\nاجمالي اشتراكات الهواتف المتنقلة\nInternet Services subscriptions\nاشتراكات بخدمات االنترنت",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 220,
+        "page_end": 220,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p220_3",
+      "content": {
+        "ar": "اشتراكات بخدمات االنترنت\nFixed Narrowband Internet Subscriptions ( less than\n256 kbit/s(⁽¹⁾\n1, 702\n1, 725\nاشتراكات النترنت بواسطة النترنت ذو السرعة\nالمنخفضة(\nاقل من256\nكيلوبايت /\nثانية) ⁾¹⁽\nFixed Broadband Subscriptions ( more than 256\nkbit/s( ⁽²⁾\n582, 900\n561, 983\nاشتراكات خدمة النطاق العريض الثابتة(\nاكثر من256 كيلوبايت /\nثانية) ⁾²⁽",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 220,
+        "page_end": 220,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p220_merged",
+      "content": {
+        "ar": "اكثر من256 كيلوبايت /\nثانية) ⁾²⁽\nTotal Fixed Internet Subscriptions\n584, 602\n563, 708اجمالي اشتراكات االنترنت الثابتة\nActive Mobile Broadband Subscriptions\n5, 344, 731\n5, 538, 868\nاالشتراكات النشطة لالنترنت ذو النطاق العريض بالهاتف المتنقل\nInternational Internet Bandwidth Capacity (\nMbps)\n3, 572, 065\n2, 612, 840\nالسعة الدولية للالنترنت( ميجابيت)\n\nالسعة الدولية للالنترنت( ميجابيت)\nNational Leased Circuits ⁽³⁾\n5, 422\n5, 214\nالدوائرالمحلية المؤجرة⁾³⁽\nTelex Lines Subscriptions\n116\n116اشتراكات خطوط التلكسIP\n)",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 220,
+        "page_end": 220,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p225_5",
+      "content": {
+        "ar": "بقية القطاعات اخلدمية حافظت علي استقرار نسيب، علي غرار. اما نشاط الزراعة فقد سج ل منوا بنسبة%1. 7 نشاط التصالت، في حني واصل قطاع الصيد اداءه القوي حمققا منوا ب%3. 7 2023 في%4. 0 202 بعد4 في%11. 8Oil activities recorded a slight growth of 0. 1% at constant\nprices in 2023, before declining by 2. 7% in 2024. This",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 225,
+        "page_end": 225,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p226_4",
+      "content": {
+        "ar": "النفطية الخنفاض في امجايل القيمة الضافة لالنشطة%4. 3\n202م مقارنة بالعام السابق ليصل4 باالسعار الارية في عام مليار ريال عماين14. 2 ايل حنو",
+        "en": "In terms of final demand, merchandise and services\nexports at constant prices recorded a growth of 9. 1% in\n2024, compared to an increase of 2. 9% in 2023. In contrast,"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 226,
+        "page_end": 226,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p240_0",
+      "content": {
+        "ar": "Mn. R. Oمليون ر. ع P\nEducationالتعليم\nع\nGross Output\n2, 282. 9\n2, 187. 7\n2, 120. 8االنتاج االجمالي\nIntermediate consumption\n330. 2\n291. 2\n273. 0مستلزمات االنتاج\nValue added, gross\n1, 952. 7\n1, 896. 5\n1, 847. 8القيمة المضافة\nCompensation of Employees\n1, 644. 1\n1, 597. 2\n1, 548. 7تعويضات العالين Q\nHealthالصحة\nف\nGross Output\n1, 492. 3\n1, 493. 2",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 240,
+        "page_end": 240,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p240_1",
+      "content": {
+        "ar": "ف\nGross Output\n1, 492. 3\n1, 493. 2\n1, 390. 0االنتاج االجمالي\nIntermediate consumption\n231. 3\n302. 6\n258. 5مستلزمات االنتاج\nValue added, gross\n1, 261. 0\n1, 190. 6\n1, 131. 4القيمة المضافة\nCompensation of Employees\n1, 021. 8\n1, 003. 0\n984. 5تعويضات العالين\nانشطة الخدمة المجتمعية والجتماعية والشخصية االخري\nص+ق\nGross Output\n610. 8\n595. 2",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 240,
+        "page_end": 240,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p240_merged",
+      "content": {
+        "ar": "ص+ق\nGross Output\n610. 8\n595. 2\n572. 5االنتاج االجمالي\nIntermediate consumption\n168. 3\n164. 1\n157. 8مستلزمات االنتاج\nValue added, gross\n442. 5\n431. 2\n414. 7القيمة المضافة\nCompensation of Employees\n151. 1\n155. 8\n149. 8تعويضات العالين\nاالسر الخاصة التي تعين افرادا الداء االعمال المنزلية\nر\nGross Output\n306. 1\n283. 7\n253. 9االنتاج االجمالي",
+        "en": "R+S\nOther Community, Social and\nPersonal Services\nT\nPrivate Households With\nEmployed Persons"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 240,
+        "page_end": 240,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p247_0",
+      "content": {
+        "ar": "ITEMS\n⁽¹⁾2024\n2023\n2022\nالبيان Mn. R. Oمليون ر. ع Resourcesالموارد\nOutput\n69, 744. 7 67, 641. 1 69, 955. 8االنتاج\nImports of Goods and Services⁽²⁾\n20, 094. 6 18, 314. 7 17, 949. 1\nالواردات من السلع والخدمات⁾²⁽\nTaxes less subsidies on products\n-192. 8\n-244. 3\n-674. 9الضرائب ناقص االعانات علي المنتج\nTOTAL",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 247,
+        "page_end": 247,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p247_1",
+      "content": {
+        "ar": "TOTAL\n89, 646. 5 85, 711. 5 87, 230. 0المجموع Usesاالستخدامات\nIntermediate Consumption\n28, 357. 7 26, 572. 6 27, 042. 4مستلزمات االنتاج\nFinal Consumption Expenditure\n23, 834. 4 23, 113. 1 21, 931. 6االستهالك النهائي\nHouseholds\n16, 089. 2 15, 390. 0 14, 447. 5\nاالسري\nGovernment\n7, 716. 2\n7, 694. 3\n7, 455. 8 الحكومي\nNon Profit Institutions\n29. 1",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 247,
+        "page_end": 247,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p247_2",
+      "content": {
+        "ar": "Non Profit Institutions\n29. 1\n28. 8\n28. 2 الهيئات التي ال تهدف الي الربح\nGross Fixed Capital Formation\n10, 519. 4\n9, 911. 3\n9, 691. 0اجمالي التكوين الراسمالي الثابت\nBuilding and Construction\n6, 908. 4\n6, 938. 7\n7, 031. 0 المباني والتشييدات\nMachinery and Equipment\n2, 009. 8\n1, 459. 4\n1, 231. 2 الالالت والمعدات\nIntangible Fixed Assets\n1, 601. 3",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 247,
+        "page_end": 247,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p247_3",
+      "content": {
+        "ar": "Intangible Fixed Assets\n1, 601. 3\n1, 513. 2\n1, 428. 7 االصول غير الملموسة\nChanges in Inventories\n-283. 1\n973. 2\n1, 848. 9التغير في المخزون\nExports of Goods and Services ⁽³⁾\n25, 510. 1 23, 654. 1 25, 398. 0\nالصادرات من السلع والخدمات⁾³⁽\nRe-Export\n1, 708. 0\n1, 487. 2\n1, 318. 1اعادة التصدير\nTOTAL\n89, 646. 5 85, 711. 5 87, 230. 0المجموع 1. Provisional",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 247,
+        "page_end": 247,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p247_4",
+      "content": {
+        "ar": "1. مبدئي 2. Include Re-export\n2. يشمل اعادة التصدير 3. Exclude Re-export\n3. ال يشمل اعادة التصدير\nNote : -The Numbers may not add up due the rounding.\nمالحظة - :\nحاصل جمع بعض الرقام يمكن ان يختلف بسبب",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 247,
+        "page_end": 247,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p273_4",
+      "content": {
+        "ar": "الصريف للبنوك التقليدية علي االنشطة القتصادية خالل عام 202م4\nمليون ريال عماين امجايل قيمة القروض المنوحة من قبل145 •\n2 الف1. 0 202م بزيادة بلغت4 بنك االسكان العماين خالل عام ريال عماين مقارنة بالعام السابقThis section reviews banking statistics and their various\ndistributions in the Sultanate of Oman. It also presents the",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 273,
+        "page_end": 273,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p275_2",
+      "content": {
+        "ar": "امجايل عدد شركات التامني العالة في سلطنة عمان في عام16 • منها%05 202م، ومتثل الشركات الوطنية4 مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات•\nRO 223. 9 million was the total value of loans granted\nby Oman Development Bank to 7. 4 thousand projects\nin 2024, increased by 83. 3% compared to the previous\nyear.\n•",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 275,
+        "page_end": 275,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p282_0",
+      "content": {
+        "ar": "2024\n2023\n2022\nMonthly Incomeفئات الدخل الشهري\nGroupsالقيمة\nالعدد\nالقيمة\nالعدد\nالقيمة\nالعدد\nر. ع\n(%)\n(%)\n(%) R. O. ر.\nع antil -400\nͷǤʹ\n͹ǡͷͷ͵ǡͺ͵ͺ\nͳͻ͸\nͺǤͶ\nͳͲǡͳͲͷǡͺͲͲ\nʹͺͲ\nͳͲǤ͸\nͳʹǡ͸ͷ͸ǡͻͲͲ\n͵ͷͳ\n400-حتي 401 - 700\n͵Ǥ͸\nͷǡͳ͸ͻǡͷͺͲ\nͳͳ͸\n͹ͲǤ͹\nͺͶǡͺͻ͹ǡ͵ͲͲ\nͳǡͻ͸ͺ\n͹ͳǤͷ\nͺͷǡͺͳͲǡ͹ͲͲ\nͳǡͻͺͲ\n700 -401 701 -1000\nͺ͵Ǥͻ\nͳʹͳǡ͹ͻ͵ǡʹ͹͸\nʹǡ͹ʹ͸\nͳͷǤͷ\nͳͺǡ͸ͶͳǡͲͲͲ\n͵ͺ͵\nͳͺǤͺ\nͳ͸ǡʹͻͳǡͳͲͲ\n͵͵ͺ",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 282,
+        "page_end": 282,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p282_2",
+      "content": {
+        "ar": "القيمة\nالعدد\nالقيمة\nالعدد المحافظة\n(%)\n(%)\n(%) R. O. ر.\nع\nMuscat\nʹ͸ǤͶ\n͵ͺǡ͵ʹ͸ǡͳͲͲ\nͺ͵͹\nʹ͸ǤͲ\n͵ͳǡʹͲͳǡͷͲͲ\n͸ͻͲ\nʹͶǤͺ\nʹͻǡ͹ͳʹǡͲͲͲ\n͸ͷ͹ مسقط\nDhofar\n͵Ǥͺ\nͷǡͷͺͲǡ͵ͲͲ\nͳͳʹ\nͶǤͲ\nͶǡ͹ͷͷǡͶͲͲ\nͳͲͷ\n͵Ǥͻ\nͶǡ͸͹Ͷǡ͹ͲͲ\nͳͲͲ ظفار\nMusandam\nʹǤʹ\n͵ǡͳͶͳǡ͵ͲͲ\n͹ʹ\nͳ͵Ǥ͵\nͳͷǡͻͻͳǡͷͲͲ\n͵ͺͳ\nͳǤͶ\nͳǡ͸͸ͳǡ͹ͲͲ\n͵ͺ مسندم\nAd Dakhliyah\nͳ͵ǤͶ\nͳͻǡ͵ͺͲǡ͵ͲͲ\nͶʹ͵\nͷǤ͹\n͸ǡ͹ͺͻǡͶͲͲ\nͳͷ͸\nͳ͵Ǥͻ\nͳ͸ǡ͸͵͹ǡͺͲͲ\n͵͹ͳ الداخلية",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 282,
+        "page_end": 282,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p282_merged",
+      "content": {
+        "ar": "ͳͷ͸\nͳ͵Ǥͻ\nͳ͸ǡ͸͵͹ǡͺͲͲ\n͵͹ͳ الداخلية\nAl Batinah North\nͳ͵Ǥͳ\nͳͻǡͲͲͶǡͷͷ͸\nͶ͵͸\nͳ͵Ǥ͸\nͳ͸ǡʹ͹͸ǡͺͲͲ\n͵͸ʹ\nͳ͵Ǥͺ\nͳ͸ǡͷͲʹǡ͹ͲͲ\nͶͲͳشمال الباطنة\nAl Batinah South\nʹ͵Ǥͺ\n͵Ͷǡͷͺ͵ǡͳͲͲ\nͺͳ͵\nͳǤ͸\nͳǡͺ͹ͶǡͻͲͲ\nͶʹ\nʹͶǤʹ\nʹͻǡͲͳͶǡ͸ͲͲ\n͹Ͳͺجنوب الباطنة\nͷǤ͹\nͺǡʹͶͺǡͶͲͲ\nͳͺͲ\n͹Ǥͷ\nͻǡͲͳͳǡͲͲͲ\nʹͲ͵\nͷǤͷ\n͸ǡ͸ʹͻǡͺͲͲ\nͳͷ͵\nجنوب الشرقية\n͵Ǥͺ\nͷǡͷͷͲǡ͹ͲͲ\nͳ͵ʹ\nʹͶǤͶ\nʹͻǡ͵͵ͻǡͳͲͲ\n͹ͳʹ\nͶǤͳ\nͶǡͺͺ͵ǡʹͲͲ\nͳͳͺ\nشمال الشرقية",
+        "en": "R. O.\nValue\nNo.\nValue\nNo.\nValue\nNo.\nValue\nNo.\nValue\nNo.\nValue\nNo.\nAsh Sharqiyah\nAsh Sharqiyah"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 282,
+        "page_end": 282,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p287_0",
+      "content": {
+        "ar": "عدد الفروع\nسنة التاسيس\nCompanies\nNationalityالجنسية\nالشركات\nA. National Companies. :-\nا -الشركات الوطنية-: 1- Liva Insurance\nOmani\n32\n2004عمانية 1\n- ليفا للتامين 2- Oman United Insurance\nOmani\n14\n1985عمانية 2\n- العمانية المتحدة للتامين 3- Dhofar Insurance\nOmani\n42\n1989عمانية 3\n- ظفار للتامين 5- Muscat Insurance\nOmani\n10\n1995عمانية4",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 287,
+        "page_end": 287,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p287_1",
+      "content": {
+        "ar": "Omani\n10\n1995عمانية4\n- مسقط للتامين 6- Oman Qatar Insurance\nOmani\n14\n2004عمانية 5\n-\nالعمانية القطرية للتامين 7- Arabia Falcon Insurance\nOmani\n7\n2005عمانية 6\n-\nالتامين العربية فالكون 8- Al Madina Insurance\nOmani\n8\n2006عمانية 7\n-\nالمدينة للتامين 9- Takaful Oman\nOmani\n12\n2014عمانية8\n-تكافل عمان للتامين\nB - Arab Companies. :-\nب -",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 287,
+        "page_end": 287,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p287_2",
+      "content": {
+        "ar": "B - Arab Companies. :-\nب -\nالشركات العربية-: 1- Oman Insurance\nUAE\n1\n2007اماراتية1\n-عمان للتامين 2- Orient Insurance\nUAE\n1\n2008اماراتية2\n-اورينت للتامين 3- Saudi Arabian Insurance\nKSA\n2\n2008سعودية3\n-التامين العربية السعودية\nC - Foreign Companies. :-\nج -\nالشركات الجنبية-: 1- MetLife Alico Insurance\nAmerican\n1\n1981امريكية1\n-",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 287,
+        "page_end": 287,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p287_3",
+      "content": {
+        "ar": "American\n1\n1981امريكية1\n-\nميت اليف االمريكية للتامين علي الحياة 2- Iran Insurance\nIranian\n2\n1980ايرانية2\n- التامين اليرانية 3- Gluf Insurance Group (Gulf)\nFrench\n3\n1980فرنسية3\n- مجموعة الخليج للتامين 4-The New India Insurance\nIndian\n6\n1980هندية4\n- الهندية الجديدة للتامينNo. Of\nBranches",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 287,
+        "page_end": 287,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p288_merged",
+      "content": {
+        "ar": "ʹͲʹͶ\nʹͲʹ͵\nʹͲʹʹ \u0017\u0003\u0003 \nنوع التامين R. O. ر. ع \u000fالحياة ͺͶǡͳ͸Ͳǡ͸͹ͳ\n͸͹ǡͶͳ͹ǡ͸ͺͺ\n͸͹ǡʹ͹ͳǡʹ͸͸ \u0007\n\u0003\u0013االقساط المباشرة ͵͵ǡ͹͸ʹǡʹ͹ʹ\nʹ͹ǡͶͻʹǡ͵͵Ͷ\n͵͵ǡͳ͵ͺǡ͹ͺͺ \u0003\u0006\u0003التعويضات المدفوعة \u0010\u0003\u0003\u0019\nالمركبات ͳͳͺǡʹͳͶǡͷͶͺ\nͳͳͳǡͳʹ͹ǡͲ͵ͳ\nͳͲ͸ǡͷͶʹǡͻʹ͸ \u0007\n\u0003\u0013االقساط المباشرة ͻͷǡ͵͸ͳǡͶͻ͵\n͹Ͷǡ͹ͳͲǡʹʹͶ\n\n͹Ͷǡ͹ͳͲǡʹʹͶ\nͺʹǡ͸Ͷͺǡͷ͵Ͷ \u0006\u0003التعويضات المدفوعة \u0013الممتلكات ͳͲͳǡʹ͸ͻǡͶͷͲ\nͺͶǡͻͻͶǡͶͶͳ\nͻͲǡͲʹ͸ǡͶͺ͹ \u0007\n\u0003\u0013االقساط المباشرة ͵ͷǡ͵͸Ͷǡ͵Ͷͺ\nʹ͹ǡͳ͹ʹǡ͸͹ͻ\n͵ͳǡͳͻ͸ǡ͸͵͹ \u0006\u0003التعويضات المدفوعة \u0017البحري ͳ͹ǡͻ͵ͺǡͺ͸Ͷ\nͳͺǡͲ͸ͷǡͶ͹͸\nͳͶǡʹͶͻǡͷʹͺ \u0007\n\u0003\u0013االقساط المباشرة ͸ǡͶ͵ͲǡͺͶͻ\n͵ǡͷͷͷǡͳͺͶ\n\n͵ǡͷͷͷǡͳͺͶ\nͳǡ͵Ͳͷǡ͵ʹ͹ \u0006\u0003التعويضات المدفوعة \u000fالمسؤولية ͳ͹ǡ͹ͷͺǡͷͳͳ\nͳ͹ǡ͵ͷͻǡͻͲͷ\nͳ͵ǡͺ͸ͻǡ͹Ͷͻ \u0007\n\u0003\u0013االقساط المباشرة ͻͺ͸ǡͷͺͷ\nͳǡͲͶͳǡͲ͹ͺ\nͳǡͲʹͺǡ͸͸͵ \u0006\u0003التعويضات المدفوعة \bالهندسي ʹͷǡ͸͸ͻǡͺʹ͵\nʹͲǡͻͺ͹ǡͳ͹͹\nʹͷǡͷͳͳǡͶʹ͸ \u0007\n\u0003\u0013االقساط المباشرة ʹǡͷ͹Ͳǡͳͳ͸\nͳͲǡͶͺʹǡͺ͹Ͳ\n\nͳͲǡͶͺʹǡͺ͹Ͳ\nͳ͸ǡ͹Ͷ͵ǡ͵͹ͻ \u0006\u0003التعويضات المدفوعة الصحة ͳͳʹǡͻͷʹǡͳ͵ͳ\nʹͳ͸ǡʹͳ͵ǡͳͲ͹\nͳͻͳǡͷͳ͹ǡʹ͸ʹ \u0007\n\u0003\u0013االقساط المباشرة ͻͷǡͲͷͻǡͷ͹ͳ\nͳ͹ͳǡͶ͵ͶǡͶͲ͸\nͳͶ͸ǡͷ͵ͺǡ͵͵Ͷ \u0006\u0003التعويضات المدفوعة \u0012اخري ʹͺǡ͸͸͸ǡͷͳͲ\nʹͻǡ͵Ͷ͹ǡ͸Ͳ͸\n͵ʹǡ͵͵͹ǡͺͳͲ \u0007\n\u0003\u0013االقساط المباشرة ͻǡͺ͸ͲǡͲͲ͹\n͸ǡͻͳ͹ǡ͸Ͷ͵\nͶǡͶ͵ͷǡ͵͸ͻ \u0006\u0003التعويضات المدفوعة\n\n\u0003ͳ͹\u0003Ǧͳͷ (%)\n(%)\n(%)\nالوثائق\n\nالمسجلة\n\nبشركات\n\nالتامين\n\nحسب\n\nالنوع ʹͲʹͶ\nʹͲʹ͵\nʹͲʹʹ \u0013\n\u0003\u0015\u0003\u001a\u0003 \n\u0003\u0006\u0003\u0003\u0017\n\nNo.\nNo.\nNo.",
+        "en": "No.\nNo.\nNo."
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 288,
+        "page_end": 289,
+        "chunk_type": "narrative",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p290_4",
+      "content": {
+        "ar": "سجلت اسعار جمموعة السلع واخلدمات التنوعة اعلي معدل %3. 8 202م، بلغ حنو4 للتضخم في عام\n•\n\nيعزي الرتفاع في اسعار السلع واخلدمات التنوعة بشكل رئيسي %0. 02 ايل ارتفاع اسعار السلع الشخصية بنسبة\n\nPrice Index\nThis section deals with Consumer Price Index (CPI) in the\nSultanate of Oman - according to the different commodity",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 290,
+        "page_end": 290,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_0",
+      "content": {
+        "ar": "التوزيع الجغرافي للمستشفيات حسب المحافظات والقطاع\nGeographical distribution of the Hospitals by governorates and sector 2024 3مسندم\n0\nMusandam\nمدحاء5شمال الباطنة\nMadha\n5\nAL Batinah North\nجزر الديمانيات6جنوب الباطنة\n2البريميJuzur Ad Dimaniyyat\n2\nAL Batinah South\n1\nAL Buraymi 11مسقط\n21\nMuscat 2الظاهرة\n1\nADH Dhahirah 4جنوب الشرقية\n0",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_1",
+      "content": {
+        "ar": "1\nADH Dhahirah 4جنوب الشرقية\n0\nASH Sharqiyah South 7الداخلية\n1\nAD Dakhliyah\n6شمال الشرقية\n0\nASH Sharqiyah North 3الوسطي\n0\nAL Wusta\nالقطاع الحكومي\nGovernment Sector\nجزر الحالنيات\nالقطاع الخاص\nJuzor Al Hallaniyat\nPrivate Sector\n11ظفار\nال يعتمد عيل المتدادات من ناحية الحدود الدولية واالدارية.\nنطاقوابعاد\n\nالمحافظات",
+        "en": null
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_0",
+      "content": {
+        "ar": null,
+        "en": "The limits is not authority on International and administrative boundaries.\nShown limits and dimensions of Governorates, Willayat and Populated Localities are set by National Centre for Statistics and Information for statistical\npurposes and are as such inaccurate and should not be relied upon officially."
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "narrative",
+        "language": [
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p318_4",
+      "content": {
+        "ar": "طالبا لكل معلم نصيب العلمني من الطالب في مدارس13\n5202، وبلغ امجايل/2024 سلطنة عمان خالل العام الدراسي",
+        "en": "Sultanate of Oman, including both schooling and higher schools, higher education students, colleges and other - Ministry of Education. - Ministry of Higher Education, Research, and innovation - Ministry of Manpower. Main Results:\n•"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 318,
+        "page_end": 318,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p319_0",
+      "content": {
+        "ar": null,
+        "en": "Introduction:\nThis section highlights the education indicators in the\neducation. Some of these are the total number of: schools,\nstudents, classrooms, teachers in public and private\nhigher education, institutes and students studying abroad.\nSources of Data:"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 319,
+        "page_end": 319,
+        "chunk_type": "narrative",
+        "language": [
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p344_2",
+      "content": {
+        "ar": "الصادرة الف عدد البطاقات الشخصية العمانية الديدة77. 9 الف بطاقة عن العام السابق١٤ 202م، منخفضا بنحو4 عام مزيد من التفاصيل حول الوضوع جتدها في بوابة البيانات",
+        "en": "•\n69. 1 thousand People with disabilities were registered\nin the disabled person card system during 2024, of\nwhich males accounted for 59. 7%.\n•"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 344,
+        "page_end": 344,
+        "chunk_type": "narrative",
+        "language": [
+          "ar",
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p360_0",
+      "content": {
+        "ar": null,
+        "en": "Introduction:\nin the Sultanate of Oman, such as radio and television\nbroadcasting hours and local newspapers and magazines\naccording to their periodical issuing. It also deals with a\nset of culture indicators such as the numbers and types\nnumber of mosques in the Sultanate of Oman.\nData Sources:\n- Majan T. V Channel"
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 360,
+        "page_end": 360,
+        "chunk_type": "narrative",
+        "language": [
+          "en"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_118",
+      "content": {
+        "ar": "Governorate\nKind\tعومجملا\nيلكلا\nTotal\tعارزتسلاإ\nAquaculture\tيلحاسلا\nCoastal\tيراجتلا\nComercial\tArtisanal Fishery يفرحلا ديصلا\t\t\t\t\t\t\tةظفاحملا\nعونلا\n\t\t\t\t\tيلامجلاإ\nTotal\tىطسولا\nAl Wusta\tةيقرشلا بونج\nAsh Sharqiyah\nSouth\t⁽¹⁾ ةنطابلا\nAl Batinah\tمدنسم\nMusandam\tرافظ\nDhofar\tطقسم\nMuscat\t\nTon\t\t\t\t\t\t\t\t\t\tنط\t\t\nBig Pelagics\t\t\t\t\t\t\t\t\t\t\t\tةريبكلا ةيحطسلا كامسلاأ\nYellowfin tuna\t87,560 - 7,381 1,404 78,775 15,370 32,664 7,444 788 17,316 5,192\t\t\t\t\t\t\t\t\t\t\tرذيج\nLongtail tuna\t26,867 - 2,179 - 24,688 739 1,438 10,498 6,080 323 5,610\t\t\t\t\t\t\t\t\t\t\tةوهس\nKawakawa\t4,303 - - 1 4,302 64 563 1,920 292 363 1,100\t\t\t\t\t\t\t\t\t\t\tةدص\nStriped bonitto\t517 - 261 26 230 24 89 57 4 31 26\t\t\t\t\t\t\t\t\t\t\tةناطقس\nFrigate tuna\t5,492 - 0 21 5,471 - 4,163 673 73 8 555\t\t\t\t\t\t\t\t\t\t\tةنابت\nSkipjack\t6,906 - - 6,804 102 - 3 67 2 - 30\t\t\t\t\t\t\t\t\t\t\tةبيقح\nOther tuna\t38,197 - 8,520 269 29,409 12,421 16,658 140 107 47 36\t\t\t\t\t\t\t\t\t\t\tىرخا تانوت\nKingfish\t8,851 - - - 8,851 3,945 3,149 518 781 135 324\t\t\t\t\t\t\t\t\t\t\tدعنك\nQueenfish\t5,237 - 903 127 4,206 535 849 1,307 605 286 624\t\t\t\t\t\t\t\t\t\t\tسبح\nBaracuda\t11,428 - 1,686 364 9,378 1,494 1,053 1,948 3,399 455 1,029\t\t\t\t\t\t\t\t\t\t\tماقع\nCobia\t478 - - - 478 25 66 212 36 2 137\t\t\t\t\t\t\t\t\t\t\tلكس\nSailfish\t2,354 - - 7 2,347 114 568 498 28 595 544\t\t\t\t\t\t\t\t\t\t\tخيم\nLarge Jacks\t25,625 - 64 1 25,560 4,210 8,561 3,411 2,220 5,300 1,859\t\t\t\t\t\t\t\t\t\t\tريبك لاص\nOther\t17,507 - 13 8,179 9,314 344 5,325 1,432 466 132 1,614\t\t\t\t\t\t\t\t\t\t\tىرخا\nSubtotal\t241,321 - 21,007 17,204 203,110 39,284 75,149 30,124 14,881 24,992 18,681\t\t\t\t\t\t\t\t\t\t\tيلامــجا\nSmall Pelagics\t\t\t\t\t\t\t\t\t\t\t\tةريغــص ةيــحطــس كامـسا\nSardine\t199,262 - 702 - 198,560 92,346 65,141 9,156 473 27,025 4,420\t\t\t\t\t\t\t\t\t\t\tةموع\nIndian Mackerel\t98,258 - 36,620 - 61,637 29,364 22,818 2,842 1,128 3,454 2,031\t\t\t\t\t\t\t\t\t\t\tةعلض\nAnchovy\t19,903 - - - 19,903 - 1 14,985 2,479 452 1,986\t\t\t\t\t\t\t\t\t\t\tةيرب\nSmall Jacks\t122,055 - 20,510 48,471 53,075 16,808 22,119 7,371 2,652 114 4,012\t\t\t\t\t\t\t\t\t\t\tريغص لاص\nMullets\t11,890 - 1,257 - 10,634 3,612 2,642 126 53 4,097 105\t\t\t\t\t\t\t\t\t\t\tحايب\nNeedlefish\t1,466 - - - 1,466 23 17 124 1,230 - 72\t\t\t\t\t\t\t\t\t\t\tروخرخ\nOther:\t1,160 - - - 1,160 340 422 216 86 - 94\t\t\t\t\t\t\t\t\t\t\tىرخا\nSubtotal:\t453,994 - 59,089 48,471 346,434 142,493 113,159 34,819 8,102 35,142 12,719\t\t\t\t\t\t\t\t\t\t\tيلامجلاإ",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 118,
+        "page_end": 118,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_209",
+      "content": {
+        "ar": "Month\t2024\t\t\t2023\t\t\tرهشلا\n\tةغرفم ةيطفن تاجتنم\n(000 نط رتم )\nOil Products\nunloaded\n(000 MT)\tنوحشملا طفنلا\n(000 ليمرب)\nOil Loaded\n(000 BBL)\tةيسارلا نفسلا\nVessels\tةغرفم ةيطفن تاجتنم\n(000 نط رتم )\nOil Products\nunloaded\n(000 MT)\tنوحشملا طفنلا\n(000 ليمرب)\nOil Loaded\n(000 BBL)\tةيسارلا نفسلا\nVessels",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 209,
+        "page_end": 209,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_209",
+      "content": {
+        "ar": "January\t- 29,108 18 - 27,468 21\tرياني\nFebruary\t- 31,020 19 - 27,030 17\tرياربف\nMarch\t- 29,759 20 - 28,022 20\tسرام\nApril\t- 27,538 19 - 28,073 18\tليربا\nMay\t- 28,752 19 - 28,483 21\tويام\nJune\t- 26,543 18 - 23,834 16\tوينوي\nJuly\t- 28,494 20 - 31,381 23\tويلوي\nAugust\t- 31,493 23 - 30,086 21\tسطسغا\nSeptember\t- 29,366 18 - 27,367 17\tربمتبس\nOctober\t- 27,024 17 - 28,707 18\tربوتكا\nNovember\t- 31,356 20 - 32,033 24\tربمفون\nDecember\t- 29,892 18 - 29,343 19\tربمسيد",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 209,
+        "page_end": 209,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p212_merged",
+      "content": {
+        "ar": "Registered Type\t2024\t2023\tليجستلا عون\n\nPrivate\t1,396,117 1,326,587\tةصاخ\nCommercial\t253,895 244,486\tةيراجت\nRental\t39,919 33,861\tريجأت\nTaxi\t28,239 27,881\tةرجأ\nGovernment\t11,814 11,636\tيموكح\nDiplomatic\t917 885\tةيسايس تائيه\nDriving School\t5,184 5,417\tةقايسلا ميلعت\nTractors\t1,254 1,270\tيعارز رارج\nMotorbikes\t7,734 7,074\tةيلآ تاجارد\n)1(Tepm\t8,799 8,296\t)1( تقؤم\nGrand Total\t1,753,872 1,667,393\tماعلا يلامجلاإ",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 212,
+        "page_end": 212,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_220",
+      "content": {
+        "ar": "Subscriptions\t2024\t2023\tتاكارتشلاإ\n\tNo. .ددع\t\t\nFixed line subscriptions\t\t\tتباثلا طخلا تاكارتشا\nAnalogue Fixed Telephone Lines\t66,720\t84,514\tةيلثامتلا تباثلا فتاهلا طوطخ\nPublic Telephone - Payphone\t127\t6,801\tةيمومعلا فتاوهلا\nISDN Channels ( Equivalent DELs )\t49,634\t49,722\tةلماكتملا تامدخلل ةيمقرلا ةكبشلا تاونق\nVoIP Subscription\t318,478\t296,869\t( تنرتنلاإ لوكوتورب ةينقتب ةلصوملا تباثلا فتاهلا\n) IP\nWLL Connection\t523\t703\tةيكلسللاا طوطخ\nTotal Fixed Telephones Lines\t435,482\t438,609\tتباثلا فتاهلا طوطخ يلامجإ\nMobile Phone subscriptions\t\t\tلقنتملا فتاهلا تاكارتشا\nMobile Phone Post-paid\t1,238,958\t1,150,392\t) عفدلا لجلاآ ( لقنتملا فتاهلا\nPre-paid mobile\t5,114,919\t5,166,698\tاقبسم ةميقلا عوفدم لقنتملا فتاهلا\nOperators\t3,889,244\t3,902,461\tنيلغشم\nResellers\t1,225,675\t1,264,237\tعيبلا ةداعإ\nTotal Mobile Subscriptions\t6,353,877\t6,317,090\tةلقنتملا فتاوهلا تاكارتشا يلامجإ\nInternet Services subscriptions\t\t\tتنرتنلاإ تامدخب تاكارتشا\nFixed Narrowband Internet Subscriptions ( less than\n256 kbit/s(⁽¹⁾\t1,702\t1,725\tةعرسلا وذ تنرتنلا ةطساوب تنرتنلا تاكارتشإ\n⁽¹⁾ ) ةيناث / تيابوليك 256 نم لقأ ( ةضفخنملا\nFixed Broadband Subscriptions ( more than 256\nkbit/s( ⁽²⁾\t582,900\t561,983\t256 نم رثكأ ( ةتباثلا ضيرعلا قاطنلا ةمدخ تاكارتشإ\n⁽²⁾ ) ةيناث / تيابوليك\nTotal Fixed Internet Subscriptions\t584,602\t563,708\tةتباثلا تنرتنلاإ تاكارتشا يلامجإ\nActive Mobile Broadband Subscriptions\t5,344,731\t5,538,868\tفتاهلاب ضيرعلا قاطنلا وذ تنرتنلإل ةطشنلا تاكارتشلاإ\nلقنتملا\nInternational Internet Bandwidth Capacity (\nMbps)\t3,572,065\t2,612,840\t)تيباجيم ( تنرتنللإل ةيلودلا ةعسلا\nNational Leased Circuits ⁽³⁾\t5,422\t5,214\t⁽³⁾ ةرجؤملا ةيلحملارئاودلا\nTelex Lines Subscriptions\t116\t116\tسكلتلا طوطخ تاكارتشإ\n1 - Including Dial up + some Internet Leased Line\n2 - Including DSL , FTTH , LTE , Satellite , Internet Leased line\n3 -It Is the lines include all transmission and reception of information\nand the Internet to a central point to her hometown Bank example\nMuscat bank and branches\t\t\tةرجؤملا تنرتنلاإ طوطخ ضعبو يفتاهلا لاصتلا لمشت -1\nDSL , FTTH , LTE , Satellite , Internet Leased line لمشت -2\nتنرتنلاو تامولعملا لابقتساو لقن لمشت طوطخ نع ةرابع يه - 3\nاهعرفاو طقسم كنب لاثم عرفا اهل ةيزكرم ةهجل",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 220,
+        "page_end": 220,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p247_merged",
+      "content": {
+        "ar": "ITEMS\t⁽¹⁾2024\t2023\t2022\tنايبلا\n\nResources\t\tدراوملا\nOutput\t69,744.7 67,641.1 69,955.8\tجاتنلاإ\nImports of Goods and Services⁽²⁾\t20,094.6 18,314.7 17,949.1\t⁽²⁾ تامدخلاو علسلا نم تادراولا\nTaxes less subsidies on products\t-192.8 -244.3 -674.9\tجتنملا ىلع تاناعلاإ صقان بئارضلا\nTOTAL\t89,646.5 85,711.5 87,230.0\tعومجملا\nUses\t\tتامادختسلاإ\nIntermediate Consumption\t28,357.7 26,572.6 27,042.4\tجاتنلاإ تامزلتسم\nFinal Consumption Expenditure\t23,834.4 23,113.1 21,931.6\tيئاهنلا كلها تسلاإ\nHouseholds\t16,089.2 15,390.0 14,447.5\tيرسلاأ\nGovernment\t7,716.2 7,694.3 7,455.8\tيموكحلا\nNon Profit Institutions\t29.1 28.8 28.2\tحبرلا ىلا فدهت ل ايتلا تائيهلا\nGross Fixed Capital Formation\t10,519.4 9,911.3 9,691.0\tتباثلا يلامسأرلا نيوكتلا يلامجإ\nBuilding and Construction\t6,908.4 6,938.7 7,031.0\tتادييشتلاو ينابملا\nMachinery and Equipment\t2,009.8 1,459.4 1,231.2\tتادعملاو تللا آلا\nIntangible Fixed Assets\t1,601.3 1,513.2 1,428.7\tةسوململا ريغ لوصلاأ\nChanges in Inventories\t-283.1 973.2 1,848.9\tنوزخملا يف ريغتلا\nExports of Goods and Services ⁽³⁾\t25,510.1 23,654.1 25,398.0\t⁽³⁾ تامدخلاو علسلا نم تارداصلا\nRe-Export\t1,708.0 1,487.2 1,318.1\tريدصتلا ةداعإ\nTOTAL\t89,646.5 85,711.5 87,230.0\tعومجملا\n1. Provisional\t\t\n2. Include Re-export\t\t\n3. Exclude Re-export",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 247,
+        "page_end": 247,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p282_merged",
+      "content": {
+        "ar": "Monthly Income\nGroups\nR.O.\t2024\t\t\t2023\t\t\t2022\t\t\tيرهشلا لخدلا تائف\nع.ر\n\t(%)\tةميقلا\nValue\tددعلا\nNo.\t(%)\tةميقلا\nValue\tددعلا\nNo.\t(%)\tةميقلا\nValue\tددعلا\nNo.\n\nantil -400\tͷǤʹ ͹ǡͷͷ͵ǡͺ͵ͺ ͳͻ͸ ͺǤͶ ͳͲǡͳͲͷǡͺͲͲ ʹͺͲ ͳͲǤ͸ ͳʹǡ͸ͷ͸ǡͻͲͲ ͵ͷͳ\t400-ىتح\n401 - 700\t͵Ǥ͸ ͷǡͳ͸ͻǡͷͺͲ ͳͳ͸ ͹ͲǤ͹ ͺͶǡͺͻ͹ǡ͵ͲͲ ͳǡͻ͸ͺ ͹ͳǤͷ ͺͷǡͺͳͲǡ͹ͲͲ ͳǡͻͺͲ\t700 -401\n701 -1000\tͺ͵Ǥͻ ͳʹͳǡ͹ͻ͵ǡʹ͹͸ ʹǡ͹ʹ͸ ͳͷǤͷ ͳͺǡ͸ͶͳǡͲͲͲ ͵ͺ͵ ͳͺǤͺ ͳ͸ǡʹͻͳǡͳͲͲ ͵͵ͺ\t1000 - 701\nmore than 1000\t͹Ǥ͵ ͳͲǡͷͺʹǡͺͲͲ ʹͳʹ ͷǤ͵ ͸ǡ͵ͷͷǡͻͲͲ ͳ͵ͳ ͶǤ͵ ͷǡʹͳͲǡͺͲͲ ͳͲ͹\t1000-مرثكا\nTotal\tͳͲͲ ͳͶͷǡͲͻͻǡͶͻͶ ͵ǡʹͷͲ ͳͲͲ ͳʹͲǡͲͲͲǡͲͲͲ ʹǡ͹͸ʹ ͳͲͲ ͳͳͻǡͻ͸ͻǡͷͲͲ ʹǡ͹͹͸\tةلمجلا",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 282,
+        "page_end": 282,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p282_merged",
+      "content": {
+        "ar": "Governorate\t2024\t\t\t2023\t\t\t2022\t\t\tةـــظفاحملا\n\t(%)\tةميقلا\nValue\tددعلا\nNo.\t(%)\tةميقلا\nValue\tددعلا\nNo.\t(%)\tةميقلا\nValue\tددعلا\nNo.\n\nMuscat\tʹ͸ǤͶ ͵ͺǡ͵ʹ͸ǡͳͲͲ ͺ͵͹ ʹ͸ǤͲ ͵ͳǡʹͲͳǡͷͲͲ ͸ͻͲ ʹͶǤͺ ʹͻǡ͹ͳʹǡͲͲͲ ͸ͷ͹\tطقسم\nDhofar\t͵Ǥͺ ͷǡͷͺͲǡ͵ͲͲ ͳͳʹ ͶǤͲ Ͷǡ͹ͷͷǡͶͲͲ ͳͲͷ ͵Ǥͻ Ͷǡ͸͹Ͷǡ͹ͲͲ ͳͲͲ\tرافظ\nMusandam\tʹǤʹ ͵ǡͳͶͳǡ͵ͲͲ ͹ʹ ͳ͵Ǥ͵ ͳͷǡͻͻͳǡͷͲͲ ͵ͺͳ ͳǤͶ ͳǡ͸͸ͳǡ͹ͲͲ ͵ͺ\tمدنسم\nAd Dakhliyah\tͳ͵ǤͶ ͳͻǡ͵ͺͲǡ͵ͲͲ Ͷʹ͵ ͷǤ͹ ͸ǡ͹ͺͻǡͶͲͲ ͳͷ͸ ͳ͵Ǥͻ ͳ͸ǡ͸͵͹ǡͺͲͲ ͵͹ͳ\tةيلخادلا\nAl Batinah North\tͳ͵Ǥͳ ͳͻǡͲͲͶǡͷͷ͸ Ͷ͵͸ ͳ͵Ǥ͸ ͳ͸ǡʹ͹͸ǡͺͲͲ ͵͸ʹ ͳ͵Ǥͺ ͳ͸ǡͷͲʹǡ͹ͲͲ ͶͲͳ\tةنطابلا لامش\nAl Batinah South\tʹ͵Ǥͺ ͵Ͷǡͷͺ͵ǡͳͲͲ ͺͳ͵ ͳǤ͸ ͳǡͺ͹ͶǡͻͲͲ Ͷʹ ʹͶǤʹ ʹͻǡͲͳͶǡ͸ͲͲ ͹Ͳͺ\tةنطابلا بونج\nAsh Sharqiyah\nSouth\tͷǤ͹ ͺǡʹͶͺǡͶͲͲ ͳͺͲ ͹Ǥͷ ͻǡͲͳͳǡͲͲͲ ʹͲ͵ ͷǤͷ ͸ǡ͸ʹͻǡͺͲͲ ͳͷ͵\tةيقرشلا بونج\nAsh Sharqiyah\nNorth\t͵Ǥͺ ͷǡͷͷͲǡ͹ͲͲ ͳ͵ʹ ʹͶǤͶ ʹͻǡ͵͵ͻǡͳͲͲ ͹ͳʹ ͶǤͳ Ͷǡͺͺ͵ǡʹͲͲ ͳͳͺ\tةيقرشلا لامش\nAdh Dhahirah\t͹Ǥͺ ͳͳǡʹͺͶǡ͹͵ͺ ʹͶͷ ͶǤͲ Ͷǡ͹͸ͲǡͶͲͲ ͳͳͳ ͺǤͷ ͳͲǡʹͷ͵ǡͲͲͲ ʹ͵Ͳ\tةرهاظلا\nTotal\tͳͲͲ ͳͶͷǡͲͻͻǡͶͻͶ ͵ǡʹͷͲ ͳͲͲ ͳʹͲǡͲͲͲǡͲͲͲ ʹǡ͹͸ʹ ͳͲͲ ͳͳͻǡͻ͸ͻǡͷͲͲ ʹǡ͹͹͸\tةلمجلا",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 282,
+        "page_end": 282,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_287",
+      "content": {
+        "ar": "Companies Nationality\t\tعورفلا ددع\nNo. Of\nBranches\tسيسأتلا ةنس\nYear of\nEstabLishment\tةيسنجلا تاكرشلا\t\nA. National Companies.:-\t\t\t\t\t-:ةينطولا تاكرشلا - أ\n1- Liva Insurance\tOmani\t32 2004\t\tةينامع\tنيمأتلل افيل - 1\n2- Oman United Insurance\tOmani\t14 1985\t\tةينامع\tنيمأتلل ةدحتملا ةينامعلا - 2\n3- Dhofar Insurance\tOmani\t42 1989\t\tةينامع\tنيمأتلل رافظ - 3\n5- Muscat Insurance\tOmani\t10 1995\t\tةينامع\tنيمأتلل طقسم - 4\n6- Oman Qatar Insurance\tOmani\t14 2004\t\tةينامع\tنيمأتلل ةيرطقلا ةينامعلا - 5\n7- Arabia Falcon Insurance\tOmani\t7 2005\t\tةينامع\tنوكلاف ةيبرعلا نيمأتلا - 6\n8- Al Madina Insurance\tOmani\t8 2006\t\tةينامع\tنيمأتلل ةنيدملا - 7\n9- Takaful Oman\tOmani\t12 2014\t\tةينامع\tنيمأتلل نامع لفاكت -8\nB - Arab Companies.:-\t\t\t\t\t-: ةيبرعلا تاكرشلا - ب\n1- Oman Insurance\tUAE\t1 2007\t\tةيتارامإ\tنيمأتلل نامع -1\n2- Orient Insurance\tUAE\t1 2008\t\tةيتارامإ\tنيمأتلل تنيروأ -2\n3- Saudi Arabian Insurance\tKSA\t2 2008\t\tةيدوعس\tةيدوعسلا ةيبرعلا نيمأتلا -3\nC - Foreign Companies.:-\t\t\t\t\t-: ةيبنجلا تاكرشلا - ج\n1- MetLife Alico Insurance\tAmerican\t1 1981\t\tةيكيرمأ\tنيمأتلل ةيكيرملاأ فيل اتيم - 1\nةايحلا ىلع\n2- Iran Insurance\tIranian\t2 1980\t\tةيناريإ\tةيناريلا نيمأتلا - 2\n3- Gluf Insurance Group (Gulf)\tFrench\t3 1980\t\tةيسنرف\tنيمأتلل جيلخلا ةعومجم - 3\n4-The New India Insurance\tIndian\t6 1980\t\tةيدنه\tنيمأتلل ةديدجلا ةيدنهلا - 4\n5- Cigna Middle East Insurance\tSwiss\t1 2006\t\tةيرسيوس\tنيماتلل طسولا قرشلا انجيس - 5\nTotal (Companies and Branches)\t-\t156 -\t\t-\t)عورفلاو تاكرشلا( يلامجإ",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 287,
+        "page_end": 287,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p288_merged",
+      "content": {
+        "ar": "\u0017\u0003\u0003  \tʹͲʹͶ\tʹͲʹ͵\tʹͲʹʹ\tنيماتلا عون\n\n\u000f\t\tةايحلا\n\u0007 \u0003\u0013\tͺͶǡͳ͸Ͳǡ͸͹ͳ ͸͹ǡͶͳ͹ǡ͸ͺͺ ͸͹ǡʹ͹ͳǡʹ͸͸\tةرشابملا طاسقلاأ\n\u0003\u0006\u0003\t͵͵ǡ͹͸ʹǡʹ͹ʹ ʹ͹ǡͶͻʹǡ͵͵Ͷ ͵͵ǡͳ͵ͺǡ͹ͺͺ\tةعوفدملا تاضيوعتلا\n\u0010\u0003\u0003\u0019 \t\tتابكرملا\n\u0007 \u0003\u0013\tͳͳͺǡʹͳͶǡͷͶͺ ͳͳͳǡͳʹ͹ǡͲ͵ͳ ͳͲ͸ǡͷͶʹǡͻʹ͸\tةرشابملا طاسقلاأ\n\u0006\u0003\tͻͷǡ͵͸ͳǡͶͻ͵ ͹Ͷǡ͹ͳͲǡʹʹͶ ͺʹǡ͸Ͷͺǡͷ͵Ͷ\tةعوفدملا تاضيوعتلا\n\u0013\t\tتاكلتمملا\n\u0007 \u0003\u0013\tͳͲͳǡʹ͸ͻǡͶͷͲ ͺͶǡͻͻͶǡͶͶͳ ͻͲǡͲʹ͸ǡͶͺ͹\tةرشابملا طاسقلاأ\n\u0006\u0003\t͵ͷǡ͵͸Ͷǡ͵Ͷͺ ʹ͹ǡͳ͹ʹǡ͸͹ͻ ͵ͳǡͳͻ͸ǡ͸͵͹\tةعوفدملا تاضيوعتلا\n\u0017\t\tيرحبلا\n\u0007 \u0003\u0013\tͳ͹ǡͻ͵ͺǡͺ͸Ͷ ͳͺǡͲ͸ͷǡͶ͹͸ ͳͶǡʹͶͻǡͷʹͺ\tةرشابملا طاسقلاأ\n\u0006\u0003\t͸ǡͶ͵ͲǡͺͶͻ ͵ǡͷͷͷǡͳͺͶ ͳǡ͵Ͳͷǡ͵ʹ͹\tةعوفدملا تاضيوعتلا\n\u000f\t\tةيلوؤسملا\n\u0007 \u0003\u0013\tͳ͹ǡ͹ͷͺǡͷͳͳ ͳ͹ǡ͵ͷͻǡͻͲͷ ͳ͵ǡͺ͸ͻǡ͹Ͷͻ\tةرشابملا طاسقلاأ\n\u0006\u0003\tͻͺ͸ǡͷͺͷ ͳǡͲͶͳǡͲ͹ͺ ͳǡͲʹͺǡ͸͸͵\tةعوفدملا تاضيوعتلا\n\b\t\tيسدنهلا\n\u0007 \u0003\u0013\tʹͷǡ͸͸ͻǡͺʹ͵ ʹͲǡͻͺ͹ǡͳ͹͹ ʹͷǡͷͳͳǡͶʹ͸\tةرشابملا طاسقلاأ\n\u0006\u0003\tʹǡͷ͹Ͳǡͳͳ͸ ͳͲǡͶͺʹǡͺ͹Ͳ ͳ͸ǡ͹Ͷ͵ǡ͵͹ͻ\tةعوفدملا تاضيوعتلا\n\t\tةحصلا\n\u0007 \u0003\u0013\tͳͳʹǡͻͷʹǡͳ͵ͳ ʹͳ͸ǡʹͳ͵ǡͳͲ͹ ͳͻͳǡͷͳ͹ǡʹ͸ʹ\tةرشابملا طاسقلاأ\n\u0006\u0003\tͻͷǡͲͷͻǡͷ͹ͳ ͳ͹ͳǡͶ͵ͶǡͶͲ͸ ͳͶ͸ǡͷ͵ͺǡ͵͵Ͷ\tةعوفدملا تاضيوعتلا\n\u0012\t\tىرخا\n\u0007 \u0003\u0013\tʹͺǡ͸͸͸ǡͷͳͲ ʹͻǡ͵Ͷ͹ǡ͸Ͳ͸ ͵ʹǡ͵͵͹ǡͺͳͲ\tةرشابملا طاسقلاأ\n\u0006\u0003\tͻǡͺ͸ͲǡͲͲ͹ ͸ǡͻͳ͹ǡ͸Ͷ͵ ͶǡͶ͵ͷǡ͵͸ͻ\tةعوفدملا تاضيوعتلا\n\t\t\n\u0017\t\tةلمجلا\n\u0003\u0007 \u0003\u0013\tͷͲ͸ǡ͸͵ͲǡͷͲͺ ͷ͸ͷǡͷͳʹǡͶ͵ͳ ͷͶͳǡ͵ʹ͸ǡͶͷͶ\tةرشابملاطاسقلاأ\n\u0003\u0006\u0003\tʹ͹ͻǡ͵ͻͷǡʹͶͳ ͵ʹʹǡͺͲ͸ǡͶͳͺ ͵ͳ͹ǡͲ͵ͷǡͲ͵ͳ\tةعوفدملاتاضيوعتلا",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 288,
+        "page_end": 288,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_289",
+      "content": {
+        "ar": "ͳͲͲ ʹǡʹͳͲǡ͹ͺʹ ͳͲͲǤͲ ʹǡͳͲͻǡͳͻͻ ͳͲͲ ʹǡͲʹ͹ǡͷʹ͹\tͻǤͲ ͳͻͺǡͻʹ͸ ͵Ǥͺ ͹ͻǡʹͺ͸ ͶǤͶ ͺͺǡͷʹͺ\tͳǤʹ ʹ͸ǡͳͲͳ ͳǤ͹ ͵Ͷǡͺ͵Ͷ ͳǤͺ ͵͸ǡ͵ͳͷ\tͲǤʹ ͵ǡͺͳͻ ͲǤʹ ͵ǡ͹Ͷͺ ͲǤʹ ͶǡͲͳͲ\tͲǤ͵ ͸ǡ͸͵Ͷ ͲǤ͵ ͸ǡʹͻͻ ͲǤ͵ ͸ǡͲͻͷ\tͲǤͶ ͺǡ͵ͳ͵ ͲǤͶ ͺǡ͹͹͵ ͲǤͷ ͻǡͶ͹ͷ\tͲǤ͸ ͳ͵ǡʹ͵͹ ͲǤ͹ ͳͶǡͳͶͳ ͲǤ͹ ͳ͵ǡͺͺ͹\t͹ͺǤ͵ ͳǡ͹͵ʹǡͳͲͺ ͺͳǤ͹ ͳǡ͹ʹʹǡͳͺͶ ͹ͻǤʹ ͳǡ͸Ͳ͸ǡͲʹ͸\tͳͲǤͲ ʹʹͳǡ͸ͶͶ ͳͳǤͶ ʹ͵ͻǡͻ͵Ͷ ͳ͵ǤͲ ʹ͸͵ǡͳͻͳ",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 289,
+        "page_end": 289,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p289_merged",
+      "content": {
+        "ar": "(%)\tʹͲʹͶ\nددع No.\t\n(%)\tʹͲʹ͵\nددع No.\t\n(%)\tʹͲʹʹ\nددع No.\n\nةلمجلا\tىرخا\tةحصلا\tيسدنهلا\tةيلوؤسملا\tيرحبلا\tتاكلتمملا\tتابكرملا\tةايحلا",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 289,
+        "page_end": 289,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_merged",
+      "content": {
+        "ar": "3\tمدنسم\n0\tMusandam\n\nءاحدم\t5\tةنطابلا لامش\nMadha\t5\tAL Batinah North",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_merged",
+      "content": {
+        "ar": "6\tةنطابلا بونج\n2\tAL Batinah South\n\n2\tيميربلا\n1\tAL Buraymi",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_merged",
+      "content": {
+        "ar": "11\tطقسم\n21\tMuscat\n\n2\tةرهاظلا\n1\tADH Dhahirah",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_merged",
+      "content": {
+        "ar": "4\tةيقرشلا بونج\n0\tASH Sharqiyah South\n\n7\tةيلخادلا\n1\tAD Dakhliyah",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "yearbook2025_unknown_unknown_p308_merged",
+      "content": {
+        "ar": "6\tةيقرشلا لامش\n0\tASH Sharqiyah North\n\n3\tىطسولا\n0\tAL Wusta",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": true
+      }
+    },
+    {
+      "chunk_id": "table_unknown_308",
+      "content": {
+        "ar": "11\tرافظ\n3\tDhofar",
+        "en": ""
+      },
+      "metadata": {
+        "document": "Statistical Year Book 2025",
+        "year": 2024,
+        "chapter": null,
+        "section": null,
+        "page_start": 308,
+        "page_end": 308,
+        "chunk_type": "table",
+        "language": [
+          "ar"
+        ],
+        "embedding_allowed": false
+      }
+    }
+  ],
+  "total_chunks": 107,
+  "narrative_chunks": 85,
+  "table_chunks": 18
+}
