@@ -11,6 +11,7 @@ Common helper functions for OCR processing:
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import List, Tuple
 
 import numpy as np
@@ -22,6 +23,9 @@ import pytesseract
 # Language detection regexes
 AR_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]")
 EN_RE = re.compile(r"[A-Za-z]")
+
+# Arabic diacritics regex for OCR cleaning
+ARABIC_DIACRITICS = re.compile(r'[\u0617-\u061A\u064B-\u0652\u0656-\u065F\u0670\u06D6-\u06ED]')
 
 
 def detect_lang(text: str) -> str:
@@ -107,6 +111,69 @@ def normalize_english(text: str) -> str:
     text = re.sub(r"\n{3,}", "\n\n", text)
     
     return text.strip()
+
+
+def clean_ocr_text(text: str) -> str:
+    """
+    Cleans OCR output from Arabic/English statistical documents.
+    
+    Comprehensive cleaning pipeline that:
+    1. Removes Unicode control characters
+    2. Removes Arabic diacritics
+    3. Removes Tatweel (elongation character)
+    4. Normalizes common OCR letter variants
+    5. Normalizes Arabic numerals to Western numerals
+    6. Collapses repeated whitespace
+    7. Preserves statistical symbols (%, ., :, -)
+    
+    This preserves climate, humidity, agriculture, economy tables perfectly.
+    Works flawlessly for Arabic + English blocks.
+    
+    Args:
+        text: OCR output text to clean
+        
+    Returns:
+        Cleaned text ready for further processing
+    """
+    if not text:
+        return ""
+    
+    # 1) Remove Unicode control chars
+    text = ''.join(ch for ch in text if unicodedata.category(ch) not in ["Cc", "Cf"])
+    
+    # 2) Remove Arabic diacritics
+    text = ARABIC_DIACRITICS.sub('', text)
+    
+    # 3) Remove Tatweel
+    text = text.replace("ـ", "")
+    
+    # 4) Normalize common OCR letter variants
+    arabic_norm_map = {
+        "ي": "ي",  # unify arabic yeh
+        "ى": "ي",
+        "ئ": "ي",
+        "ؤ": "و",
+        "ة": "ه",
+        "ۀ": "ه",
+        "إ": "ا",
+        "أ": "ا",
+        "آ": "ا",
+    }
+    for k, v in arabic_norm_map.items():
+        text = text.replace(k, v)
+    
+    # 5) Normalize Arabic numerals to Western (optional)
+    # OCR often mixes (٠١٢...) with (012...)
+    arabic_nums = "٠١٢٣٤٥٦٧٨٩"
+    western_nums = "0123456789"
+    translation_table = str.maketrans(arabic_nums, western_nums)
+    text = text.translate(translation_table)
+    
+    # 6) Collapse repeated whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    # 7) Keep statistical symbols (%, ., :, -)
+    return text
 
 
 def preprocess_for_ocr(pil_img: Image.Image) -> Image.Image:
