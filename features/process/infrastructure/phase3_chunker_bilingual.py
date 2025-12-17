@@ -30,9 +30,10 @@ Output: Validated chunks ready for Phase 4 (Embeddings)
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import Any, Dict, List, Literal, Optional
 
 from features.process.domain.interfaces import IChunker
@@ -52,13 +53,200 @@ except ImportError:
         return "mixed"
 
 
-ChunkType = Literal["narrative", "table"]
+ChunkType = Literal["narrative", "table", "table_fragment"]
 LangCode = Literal["ar", "en", "mixed"]
+
+# Constants for strict chunk semantics
+MAX_HEADER_CHARS = 200  # Headers must never exceed 200 chars total
+MAX_NUMERIC_DENSITY_HEADER = 0.10  # Headers with >10% numeric density are reclassified
+MAX_TABLE_CHARS_FOR_SPLIT = 12000  # Tables only split if exceeding 12,000 chars
+MAX_TABLE_CHARS_NORMAL = 6000  # Normal table chunk size (for structure preservation)
 
 
 def slugify(text: str) -> str:
     """Convert text to URL-safe slug for chunk IDs."""
     return re.sub(r'[^a-z0-9]+', '_', (text or 'unknown').lower()).strip('_')
+
+
+def extract_key_phrase(content: Dict[str, Optional[str]], max_words: int = 3) -> str:
+    """
+    Extract first meaningful words from content for chunk ID.
+    
+    Prefers English if available, falls back to Arabic.
+    Skips common words and returns slugified phrase.
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys
+        max_words: Maximum number of words to extract
+        
+    Returns:
+        Slugified key phrase (e.g., "oil_exports_monthly")
+    """
+    # Common words to skip (English and Arabic)
+    common_words_en = {
+        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
+        "of", "with", "by", "from", "as", "is", "are", "was", "were", "be",
+        "been", "being", "have", "has", "had", "do", "does", "did", "will",
+        "would", "should", "could", "may", "might", "must", "can", "this",
+        "that", "these", "those", "it", "its", "they", "them", "their"
+    }
+    common_words_ar = {
+        "في", "من", "إلى", "على", "عن", "مع", "هذا", "هذه", "ذلك", "تلك",
+        "التي", "الذي", "كان", "كانت", "يكون", "تكون", "كانوا", "كانت"
+    }
+    
+    # Prefer English, fallback to Arabic
+    text = content.get("en") or content.get("ar") or ""
+    
+    if not text or not text.strip():
+        return "unknown"
+    
+    # Normalize whitespace
+    text = " ".join(text.split())
+    
+    # Extract words (handle both English and Arabic)
+    words = re.findall(r'\b\w+\b|[\u0600-\u06FF]+', text)
+    
+    # Filter out common words and empty strings
+    meaningful_words = []
+    for word in words:
+        word_lower = word.lower().strip()
+        if (word_lower and 
+            word_lower not in common_words_en and 
+            word not in common_words_ar and
+            len(word_lower) > 2):  # Skip very short words
+            meaningful_words.append(word)
+            if len(meaningful_words) >= max_words:
+                break
+    
+    if not meaningful_words:
+        return "unknown"
+    
+    # Join and slugify
+    phrase = "_".join(meaningful_words[:max_words])
+    return slugify(phrase)
+
+
+def generate_content_hash(content: Dict[str, Optional[str]]) -> str:
+    """
+    Create short hash from normalized content for chunk ID.
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys
+        
+    Returns:
+        First 6 characters of MD5 hash (e.g., "a3f2b1")
+    """
+    ar_text = (content.get("ar") or "").strip()
+    en_text = (content.get("en") or "").strip()
+    
+    # Normalize whitespace
+    ar_text = " ".join(ar_text.split())
+    en_text = " ".join(en_text.split())
+    
+    # Create hash
+    content_str = f"{ar_text}|{en_text}"
+    hash_obj = hashlib.md5(content_str.encode('utf-8'))
+    hash_hex = hash_obj.hexdigest()
+    
+    # Return first 6 characters
+    return hash_hex[:6]
+
+
+def calculate_numeric_density(text: str) -> float:
+    """
+    Calculate the ratio of numeric characters to total characters.
+    
+    Args:
+        text: Text to analyze
+        
+    Returns:
+        Ratio of numeric characters (0.0 to 1.0)
+    """
+    if not text or len(text.strip()) == 0:
+        return 0.0
+    
+    numeric_chars = len(re.findall(r'\d', text))
+    total_chars = len(text)
+    
+    return numeric_chars / total_chars if total_chars > 0 else 0.0
+
+
+def normalize_table_for_hash(content: Dict[str, Optional[str]]) -> str:
+    """
+    Normalize table content for deduplication hashing.
+    
+    Strips whitespace, removes headers, normalizes ordering.
+    Used to detect duplicate table layouts within same chapter+section.
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys containing table content
+        
+    Returns:
+        Normalized string for hashing
+    """
+    ar_text = (content.get("ar") or "").strip()
+    en_text = (content.get("en") or "").strip()
+    
+    # Combine both languages
+    combined = f"{ar_text}\n{en_text}"
+    
+    # Remove all whitespace (spaces, tabs, newlines)
+    normalized = re.sub(r'\s+', '', combined)
+    
+    # Remove common table noise (page numbers, book titles)
+    normalized = re.sub(r'Statistical\s*Year\s*Book', '', normalized, flags=re.IGNORECASE)
+    normalized = re.sub(r'صفحة\s*\d+', '', normalized)  # Arabic "page"
+    normalized = re.sub(r'Page\s*\d+', '', normalized, flags=re.IGNORECASE)
+    normalized = re.sub(r'\d+', '', normalized)  # Remove all numbers for layout comparison
+    
+    # Sort lines to normalize ordering (if table rows are reordered)
+    lines = sorted(normalized.split('\n'))
+    normalized = ''.join(lines)
+    
+    return normalized.lower()
+
+
+def strip_page_noise(content: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
+    """
+    Strip page noise and book titles from content before embedding.
+    
+    Removes:
+    - "Statistical Year Book" (any case)
+    - Page numbers (Arabic and English)
+    - Repeated bilingual book titles
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys
+        
+    Returns:
+        Cleaned content dictionary
+    """
+    ar_text = content.get("ar") or ""
+    en_text = content.get("en") or ""
+    
+    # Patterns to remove
+    noise_patterns = [
+        r'Statistical\s+Year\s+Book\s+\d+',  # "Statistical Year Book 2025"
+        r'صفحة\s*\d+',  # Arabic "page X"
+        r'Page\s+\d+',  # English "Page X"
+        r'\b\d+\s*$',  # Standalone page numbers at end of line
+        r'^Statistical\s+Year\s+Book',  # Book title at start
+        r'كتاب\s+الإحصاء\s+السنوي',  # Arabic book title
+    ]
+    
+    for pattern in noise_patterns:
+        ar_text = re.sub(pattern, '', ar_text, flags=re.IGNORECASE | re.MULTILINE)
+        en_text = re.sub(pattern, '', en_text, flags=re.IGNORECASE | re.MULTILINE)
+    
+    # Clean up extra whitespace
+    ar_text = re.sub(r'\n\s*\n\s*\n+', '\n\n', ar_text).strip()
+    en_text = re.sub(r'\n\s*\n\s*\n+', '\n\n', en_text).strip()
+    
+    return {
+        "ar": ar_text if ar_text else None,
+        "en": en_text if en_text else None,
+    }
 
 
 @dataclass
@@ -73,6 +261,11 @@ class ChunkMetadata:
     chunk_type: str = "narrative"  # Changed from ChunkType to allow glossary, etc.
     language: List[str] = None  # type: ignore
     embedding_allowed: bool = True  # NEW: Explicit embedding control
+    # Table-specific metadata
+    units: Optional[List[str]] = None  # Measurement units (e.g., ["000 MT", "000 BBL"])
+    data_year: Optional[List[int]] = None  # Years covered by data (e.g., [2024, 2023])
+    geography: Optional[List[str]] = None  # Geographic areas (e.g., ["Muscat Governorate"])
+    bilingual_alignment: Optional[Dict[str, str]] = None  # Arabic -> English term mapping
 
     def __post_init__(self):
         if self.language is None:
@@ -87,16 +280,43 @@ class Chunk:
     metadata: ChunkMetadata
 
 
-def classify_content_type(text: str, block_type: str, section: Optional[str] = None) -> str:
+def classify_content_type(
+    text: str, 
+    block_type: str, 
+    section: Optional[str] = None,
+    content: Optional[Dict[str, Optional[str]]] = None
+) -> str:
     """
     Classify content type with section context.
     
     REFINEMENT 2: Added section-aware glossary detection for better precision.
+    NEW: Enforces header misclassification rules (max 200 chars, <10% numeric density).
     """
     if block_type == "table":
         return "table"
     
-    if block_type in ["toc", "footer", "header"]:
+    # CRITICAL: Header validation - reclassify if exceeds limits
+    if block_type == "header":
+        if content:
+            ar_text = (content.get("ar") or "").strip()
+            en_text = (content.get("en") or "").strip()
+            total_chars = len(ar_text) + len(en_text)
+            
+            # Rule 1: Headers must never exceed 200 chars
+            if total_chars > MAX_HEADER_CHARS:
+                logger.warning(f"classify_content_type: Header exceeds {MAX_HEADER_CHARS} chars ({total_chars}), reclassifying to narrative")
+                return "narrative"
+            
+            # Rule 2: Headers with >10% numeric density are reclassified
+            combined_text = f"{ar_text} {en_text}"
+            numeric_density = calculate_numeric_density(combined_text)
+            if numeric_density > MAX_NUMERIC_DENSITY_HEADER:
+                logger.warning(f"classify_content_type: Header has numeric density {numeric_density:.2%} > {MAX_NUMERIC_DENSITY_HEADER:.2%}, reclassifying to narrative")
+                return "narrative"
+        
+        return "header"
+    
+    if block_type in ["toc", "footer"]:
         return block_type
     
     # Check section context first (more reliable than patterns alone)
@@ -128,9 +348,10 @@ def is_embedding_eligible(chunk_type: str) -> bool:
     Explicit embedding policy (CRITICAL).
     
     Makes embedding control explicit to prevent silent pollution.
+    Only narrative and table (not table_fragment) are eligible.
     """
     eligible_types = {"narrative", "table"}
-    return chunk_type in eligible_types
+    return chunk_type in eligible_types and chunk_type != "table_fragment"
 
 
 def dynamic_chunk_size(block_type: str) -> int:
@@ -144,7 +365,7 @@ def dynamic_chunk_size(block_type: str) -> int:
     
     Dynamic approach:
     - Narrative blocks → chunk at ~1500 chars per language block
-    - Tables → chunk at ~6000 chars (preserve table structure)
+    - Tables → chunk at ~6000 chars (preserve table structure, but splitting disabled unless >12,000)
     
     Args:
         block_type: Type of content block ("table", "narrative", etc.)
@@ -153,7 +374,7 @@ def dynamic_chunk_size(block_type: str) -> int:
         Maximum characters for chunking this block type (per language block)
     """
     if block_type == "table":
-        return 6000  # large tables (preserve structure)
+        return MAX_TABLE_CHARS_NORMAL  # large tables (preserve structure)
     return 1500  # narrative (~1500 chars per language block as per rules)
 
 
@@ -624,11 +845,23 @@ def split_bilingual_content(chunk_text: str, original_content: Dict[str, Optiona
     return {"ar": chunk_text, "en": None}
 
 
-def validate_chunk(chunk: Chunk) -> bool:
+def validate_chunk(chunk: Chunk, table_hashes: Optional[set] = None) -> bool:
     """
-    Enhanced validation with fake bilingual detection (Rule 15, Rule 16).
+    Enhanced validation with all strict chunk semantics rules.
     
-    Checks all mandatory requirements before embedding.
+    Enforces:
+    - No headers > 200 chars
+    - No embedded table fragments
+    - No duplicated table hashes
+    - Mandatory metadata for tables
+    - Header embedding restrictions
+    
+    Args:
+        chunk: Chunk to validate
+        table_hashes: Set of normalized table hashes seen in current chapter+section (for deduplication)
+        
+    Returns:
+        True if chunk passes all validation rules, False otherwise
     """
     chunk_id_short = chunk.chunk_id[:50] if chunk.chunk_id else "unknown"
     
@@ -644,6 +877,49 @@ def validate_chunk(chunk: Chunk) -> bool:
     if not ar_text and not en_text:
         logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - empty content")
         return False
+    
+    # RULE 1: Header validation - must never exceed 200 chars
+    if chunk.metadata.chunk_type == "header":
+        total_chars = len(ar_text) + len(en_text)
+        if total_chars > MAX_HEADER_CHARS:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - header exceeds {MAX_HEADER_CHARS} chars ({total_chars})")
+            return False
+        
+        # Headers must have embedding_allowed = False
+        if chunk.metadata.embedding_allowed:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - header has embedding_allowed=True (must be False)")
+            return False
+    
+    # RULE 2: Table fragments must not be embedded
+    if chunk.metadata.chunk_type == "table_fragment":
+        if chunk.metadata.embedding_allowed:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table_fragment has embedding_allowed=True (must be False)")
+            return False
+    
+    # RULE 3: Table deduplication check
+    if chunk.metadata.chunk_type == "table" and table_hashes is not None:
+        normalized_hash = normalize_table_for_hash(chunk.content)
+        table_hash = hashlib.md5(normalized_hash.encode('utf-8')).hexdigest()
+        if table_hash in table_hashes:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - duplicate table hash detected")
+            return False
+        # Add to set for future checks (caller should manage this)
+        table_hashes.add(table_hash)
+    
+    # RULE 4: Mandatory metadata for table chunks
+    if chunk.metadata.chunk_type == "table":
+        if not chunk.metadata.section:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table missing mandatory metadata.section")
+            return False
+        if not chunk.metadata.chapter:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table missing mandatory metadata.chapter")
+            return False
+        if not chunk.metadata.data_year:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table missing mandatory metadata.data_year")
+            return False
+        if not chunk.metadata.geography:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table missing mandatory metadata.geography")
+            return False
     
     # Rule 16: Detect fake bilingual (same text in both fields)
     if ar_text and en_text:
@@ -661,20 +937,11 @@ def validate_chunk(chunk: Chunk) -> bool:
             logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - same language in both fields (ar_lang={ar_lang}, en_lang={en_lang})")
             return False  # Same language in both fields
     
-    # Check metadata
-    if not chunk.metadata.chapter and not chunk.metadata.section:
-        logger.debug(f"validate_chunk: Chunk {chunk_id_short}: No chapter/section metadata (allowed)")
-        # Allow chunks without chapter/section for now (will be enhanced)
-        pass
-    
     if chunk.metadata.page_start == 0:
         logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - page_start is 0")
         return False
     
     # Rule 10: Check for broken text
-    ar_text = chunk.content.get("ar") or ""
-    en_text = chunk.content.get("en") or ""
-    
     # Check for obvious broken Arabic (too many isolated characters)
     if ar_text:
         isolated_chars = len(re.findall(r'\s[\u0600-\u06FF]\s', ar_text))
@@ -684,13 +951,25 @@ def validate_chunk(chunk: Chunk) -> bool:
             return False
     
     # Check minimum content length for narrative chunks
-    # UPDATED: Reduced minimum to 20 chars to capture more content
-    # Small chunks will be merged later if needed
     if chunk.metadata.chunk_type == "narrative":
         total_length = len(ar_text) + len(en_text)
-        if total_length < 20:  # Too short (reduced from 50 to capture more content)
+        if total_length < 20:  # Too short
             logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - too short (length={total_length} < 20)")
             return False
+    
+    # RULE 5: Embedding policy guardrails with runtime assertion
+    if chunk.metadata.embedding_allowed:
+        if chunk.metadata.chunk_type not in {"narrative", "table"}:
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - embedding_allowed=True but chunk_type={chunk.metadata.chunk_type} not eligible")
+            return False
+        if chunk.metadata.chunk_type == "table_fragment":
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table_fragment cannot have embedding_allowed=True")
+            return False
+        # Runtime assertion: Only narrative and table (not table_fragment) can be embedded
+        assert chunk.metadata.chunk_type in {"narrative", "table"}, \
+            f"Embedding policy violation: chunk_type={chunk.metadata.chunk_type} cannot be embedded"
+        assert chunk.metadata.chunk_type != "table_fragment", \
+            f"Embedding policy violation: table_fragment cannot be embedded"
     
     logger.debug(f"validate_chunk: Chunk {chunk_id_short}: Validation passed (type={chunk.metadata.chunk_type}, ar_len={len(ar_text)}, en_len={len(en_text)})")
     return True
@@ -793,11 +1072,16 @@ def chunk_section_blocks(
                 invalid_blocks += 1
                 continue
             
+            # STRIP PAGE NOISE before classification
+            cleaned_chunk_content = strip_page_noise(chunk_content)
+            
             # Classify content type with section context (REFINEMENT 2)
+            # Pass content for header validation
             content_type = classify_content_type(
                 chunk_text,
                 block.get("type", ""),
-                section=block.get("section")
+                section=block.get("section"),
+                content=cleaned_chunk_content,
             )
             
             # Use block's own chapter/section, not the passed parameters
@@ -805,6 +1089,8 @@ def chunk_section_blocks(
             block_section = block.get("section") or section
             
             # Create metadata with embedding control
+            # Headers must have embedding_allowed=False
+            embedding_allowed = is_embedding_eligible(content_type) and content_type != "header"
             metadata = ChunkMetadata(
                 chapter=block_chapter,
                 section=block_section,
@@ -812,14 +1098,19 @@ def chunk_section_blocks(
                 page_end=block.get("pageNumber", 0),
                 chunk_type=content_type,
                 language=[lang for lang in [language] if lang != "mixed"] or ["ar", "en"] if language == "mixed" else [language],
-                embedding_allowed=is_embedding_eligible(content_type),  # NEW: Explicit control
+                embedding_allowed=embedding_allowed,
             )
             
-            # Create chunk with stable ID
-            chapter_slug = re.sub(r'[^a-z0-9]+', '_', (block_chapter or 'unknown').lower()).strip('_')
-            section_slug = re.sub(r'[^a-z0-9]+', '_', (block_section or 'unknown').lower()).strip('_')
+            # Use cleaned content for chunk
+            chunk_content = cleaned_chunk_content
+            
+            # Create chunk with stable ID (includes key phrase and hash)
+            chapter_slug = slugify(block_chapter or 'unknown')
+            section_slug = slugify(block_section or 'unknown')
+            key_phrase = extract_key_phrase(chunk_content)
+            content_hash = generate_content_hash(chunk_content)
             chunk = Chunk(
-                chunk_id=f"yearbook2025_{chapter_slug}_{section_slug}_p{block.get('pageNumber', 0)}_{i}",
+                chunk_id=f"yearbook2025_{chapter_slug}_{section_slug}_p{block.get('pageNumber', 0)}_{key_phrase}_{content_hash}",
                 content=chunk_content,
                 metadata=metadata,
             )
@@ -840,11 +1131,26 @@ def chunk_table_block(
     table_block: Dict[str, Any],
     chapter: Optional[str] = None,
     section: Optional[str] = None,
+    preceding_blocks: Optional[List[Dict[str, Any]]] = None,
+    table_hashes: Optional[set] = None,
 ) -> List[Chunk]:
     """
-    Chunk table blocks separately (Rule 7, 8).
+    Chunk table blocks separately with strict atomicity enforcement.
     
-    Tables are isolated chunks with headers preserved.
+    ENFORCES:
+    - One table = one chunk (unless > 12,000 chars)
+    - Fragments marked as "table_fragment" with embedding_allowed=False
+    - Mandatory metadata: section, chapter, data_year, geography
+    - Table deduplication by normalized hash
+    - Governorate table normalization (split multi-governorate tables)
+    - Page noise stripping
+    
+    Args:
+        table_block: The table block to chunk
+        chapter: Chapter name (if known)
+        section: Section name (if known)
+        preceding_blocks: All blocks from the same page (for extracting table summary)
+        table_hashes: Set of normalized table hashes for deduplication (mutated in-place)
     """
     logger.debug(f"chunk_table_block: Processing table block (page={table_block.get('pageNumber')}, chapter='{chapter}', section='{section}')")
     content = table_block.get("content", {})
@@ -859,79 +1165,222 @@ def chunk_table_block(
         logger.warning(f"chunk_table_block: Empty table content")
         return []
     
+    # STRIP PAGE NOISE before processing
+    table_content_dict = {"ar": ar_text, "en": en_text}
+    cleaned_content = strip_page_noise(table_content_dict)
+    ar_text = cleaned_content.get("ar") or ""
+    en_text = cleaned_content.get("en") or ""
+    
     # Use block's own chapter/section, not the passed parameters
     block_chapter = table_block.get("chapter") or chapter
     block_section = table_block.get("section") or section
     
-    # Use dynamic chunk size for tables (6000 chars)
-    max_table_chars = dynamic_chunk_size("table")
+    # MANDATORY: Ensure chapter and section exist (fail fast)
+    if not block_chapter:
+        logger.error(f"chunk_table_block: Table missing mandatory chapter - rejecting")
+        return []
+    if not block_section:
+        logger.error(f"chunk_table_block: Table missing mandatory section - rejecting")
+        return []
+    
+    # Extract table summary from preceding blocks if available
+    summary_chunks: List[Chunk] = []
+    if preceding_blocks:
+        summary_content = extract_table_summary(table_block, preceding_blocks)
+        if summary_content:
+            # Strip noise from summary too
+            summary_content = strip_page_noise(summary_content)
+            # Create narrative chunk for table summary
+            summary_metadata = ChunkMetadata(
+                chapter=block_chapter,
+                section=block_section,
+                page_start=table_block.get("pageNumber", 0),
+                page_end=table_block.get("pageNumber", 0),
+                chunk_type="narrative",
+                language=["ar", "en"] if (summary_content.get("ar") and summary_content.get("en")) else (["ar"] if summary_content.get("ar") else ["en"]),
+                embedding_allowed=True,
+            )
+            chapter_slug = slugify(block_chapter or 'unknown')
+            section_slug = slugify(block_section or 'unknown')
+            key_phrase = extract_key_phrase(summary_content)
+            content_hash = generate_content_hash(summary_content)
+            summary_chunk = Chunk(
+                chunk_id=f"table_summary_{chapter_slug}_{section_slug}_p{table_block.get('pageNumber', 0)}_{key_phrase}_{content_hash}",
+                content=summary_content,
+                metadata=summary_metadata,
+            )
+            if validate_chunk(summary_chunk):
+                summary_chunks.append(summary_chunk)
+                logger.debug(f"chunk_table_block: Created table summary narrative chunk (id={summary_chunk.chunk_id[:50]}...)")
+    
+    # Extract table metadata from preceding blocks
+    table_metadata_dict = extract_table_metadata(preceding_blocks if preceding_blocks else [])
+    
+    # MANDATORY: Ensure data_year and geography exist (set defaults if missing)
+    if not table_metadata_dict.get("data_year"):
+        # Try to extract from table content or set default
+        logger.warning(f"chunk_table_block: Table missing data_year, attempting extraction")
+        # Extract years from content
+        combined_text = f"{ar_text} {en_text}"
+        year_matches = re.findall(r'\b(20[0-3][0-9])\b', combined_text)
+        years = [int(y) for y in year_matches if 2020 <= int(y) <= 2039]
+        if years:
+            table_metadata_dict["data_year"] = sorted(set(years), reverse=True)
+        else:
+            logger.error(f"chunk_table_block: Table missing mandatory data_year - rejecting")
+            return []
+    
+    if not table_metadata_dict.get("geography"):
+        # Default to national level
+        table_metadata_dict["geography"] = ["Sultanate of Oman"]
+        logger.debug(f"chunk_table_block: Table missing geography, defaulting to 'Sultanate of Oman'")
+    
+    # Extract bilingual alignment from table content
+    table_content_dict = {"ar": ar_text, "en": en_text}
+    bilingual_alignment = extract_bilingual_alignment(table_content_dict)
     
     # Combine table text for size check
     combined_table_text = (ar_text or "") + (en_text or "")
-    logger.debug(f"chunk_table_block: Table size = {len(combined_table_text)} chars (max={max_table_chars})")
+    combined_size = len(combined_table_text)
+    logger.debug(f"chunk_table_block: Table size = {combined_size} chars")
     
-    # Rule 7: One table = one chunk (or multiple if very large)
-    # If table exceeds dynamic size, split it (preserve markdown structure)
-    if len(combined_table_text) > max_table_chars:
-        logger.info(f"chunk_table_block: Large table detected ({len(combined_table_text)} chars), splitting into multiple chunks")
-        # Split large table - try to preserve markdown table structure
-        # For now, create multiple chunks if table is very large
+    # CHECK FOR DEDUPLICATION (before processing)
+    if table_hashes is not None:
+        normalized_hash = normalize_table_for_hash(table_content_dict)
+        table_hash = hashlib.md5(normalized_hash.encode('utf-8')).hexdigest()
+        if table_hash in table_hashes:
+            logger.warning(f"chunk_table_block: Duplicate table detected (hash={table_hash[:8]}...), dropping")
+            return summary_chunks  # Return only summary chunks, drop table
+        table_hashes.add(table_hash)
+    
+    # CHECK FOR GOVERNORATE SPLITTING
+    governorate_chunks = split_governorate_table(
+        table_content_dict,
+        table_metadata_dict,
+        block_chapter,
+        block_section,
+        table_block.get("pageNumber", 0),
+    )
+    
+    # If governorate split occurred, process each separately
+    if len(governorate_chunks) > 1:
+        logger.info(f"chunk_table_block: Multi-governorate table detected, splitting into {len(governorate_chunks)} chunks")
         table_chunks: List[Chunk] = []
-        # Simple split by lines (preserve markdown table rows)
-        lines = combined_table_text.split("\n")
-        current_chunk_lines = []
-        current_size = 0
-        
-        for line in lines:
-            line_size = len(line)
-            if current_size + line_size > max_table_chars and current_chunk_lines:
-                # Create chunk from accumulated lines
-                chunk_text = "\n".join(current_chunk_lines)
-                metadata = ChunkMetadata(
-                    chapter=block_chapter,
-                    section=block_section,
-                    page_start=table_block.get("pageNumber", 0),
-                    page_end=table_block.get("pageNumber", 0),
-                    chunk_type="table",
-                    language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
-                )
-                chunk = Chunk(
-                    chunk_id=f"table_{block_chapter or 'unknown'}_{table_block.get('pageNumber', 0)}_{len(table_chunks)}",
-                    content={"ar": chunk_text if ar_text else None, "en": chunk_text if en_text else None},
-                    metadata=metadata,
-                )
-                if validate_chunk(chunk):
-                    table_chunks.append(chunk)
-                current_chunk_lines = [line]
-                current_size = line_size
-            else:
-                current_chunk_lines.append(line)
-                current_size += line_size
-        
-        # Add remaining lines as final chunk
-        if current_chunk_lines:
-            chunk_text = "\n".join(current_chunk_lines)
+        for gov_chunk_data in governorate_chunks:
+            gov_content = gov_chunk_data["content"]
+            gov_metadata = gov_chunk_data["metadata"]
+            gov_name = gov_chunk_data.get("governorate", "Unknown")
+            
             metadata = ChunkMetadata(
                 chapter=block_chapter,
                 section=block_section,
                 page_start=table_block.get("pageNumber", 0),
                 page_end=table_block.get("pageNumber", 0),
                 chunk_type="table",
-                language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+                language=["ar", "en"] if (gov_content.get("ar") and gov_content.get("en")) else (["ar"] if gov_content.get("ar") else ["en"]),
+                units=gov_metadata.get("units"),
+                data_year=gov_metadata.get("data_year"),
+                geography=gov_metadata.get("geography"),
+                bilingual_alignment=bilingual_alignment if bilingual_alignment else None,
+                embedding_allowed=True,
             )
+            
+            chapter_slug = slugify(block_chapter or 'unknown')
+            section_slug = slugify(block_section or 'unknown')
+            key_phrase = extract_key_phrase(gov_content)
+            content_hash = generate_content_hash(gov_content)
             chunk = Chunk(
-                chunk_id=f"table_{block_chapter or 'unknown'}_{table_block.get('pageNumber', 0)}_{len(table_chunks)}",
-                content={"ar": chunk_text if ar_text else None, "en": chunk_text if en_text else None},
+                chunk_id=f"table_{chapter_slug}_{section_slug}_p{table_block.get('pageNumber', 0)}_{slugify(gov_name)}_{key_phrase}_{content_hash}",
+                content=gov_content,
                 metadata=metadata,
             )
-            if validate_chunk(chunk):
+            
+            if validate_chunk(chunk, table_hashes=table_hashes):
                 table_chunks.append(chunk)
         
-        logger.info(f"chunk_table_block: Split large table into {len(table_chunks)} chunks")
-        return table_chunks if table_chunks else []
+        return summary_chunks + table_chunks
+    
+    # ENFORCE TABLE ATOMICITY: Only split if > 12,000 chars
+    if combined_size > MAX_TABLE_CHARS_FOR_SPLIT:
+        logger.warning(f"chunk_table_block: Very large table detected ({combined_size} chars > {MAX_TABLE_CHARS_FOR_SPLIT}), splitting with fragments marked")
+        # Split large table - mark fragments as table_fragment
+        table_chunks: List[Chunk] = []
+        lines = combined_table_text.split("\n")
+        current_chunk_lines = []
+        current_size = 0
+        fragment_index = 0
+        
+        for line in lines:
+            line_size = len(line)
+            if current_size + line_size > MAX_TABLE_CHARS_FOR_SPLIT and current_chunk_lines:
+                # Create fragment chunk (embedding_allowed=False)
+                chunk_text = "\n".join(current_chunk_lines)
+                chunk_content = {"ar": chunk_text if ar_text else None, "en": chunk_text if en_text else None}
+                metadata = ChunkMetadata(
+                    chapter=block_chapter,
+                    section=block_section,
+                    page_start=table_block.get("pageNumber", 0),
+                    page_end=table_block.get("pageNumber", 0),
+                    chunk_type="table_fragment",  # Mark as fragment
+                    language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+                    units=table_metadata_dict.get("units"),
+                    data_year=table_metadata_dict.get("data_year"),
+                    geography=table_metadata_dict.get("geography"),
+                    bilingual_alignment=bilingual_alignment if bilingual_alignment else None,
+                    embedding_allowed=False,  # Fragments cannot be embedded
+                )
+                chapter_slug = slugify(block_chapter or 'unknown')
+                section_slug = slugify(block_section or 'unknown')
+                key_phrase = extract_key_phrase(chunk_content)
+                content_hash = generate_content_hash(chunk_content)
+                chunk = Chunk(
+                    chunk_id=f"table_fragment_{chapter_slug}_{section_slug}_p{table_block.get('pageNumber', 0)}_{fragment_index}_{key_phrase}_{content_hash}",
+                    content=chunk_content,
+                    metadata=metadata,
+                )
+                # Fragments are not validated for embedding (they're marked as non-embeddable)
+                table_chunks.append(chunk)
+                fragment_index += 1
+                current_chunk_lines = [line]
+                current_size = line_size
+            else:
+                current_chunk_lines.append(line)
+                current_size += line_size
+        
+        # Add remaining lines as final fragment
+        if current_chunk_lines:
+            chunk_text = "\n".join(current_chunk_lines)
+            chunk_content = {"ar": chunk_text if ar_text else None, "en": chunk_text if en_text else None}
+            metadata = ChunkMetadata(
+                chapter=block_chapter,
+                section=block_section,
+                page_start=table_block.get("pageNumber", 0),
+                page_end=table_block.get("pageNumber", 0),
+                chunk_type="table_fragment",
+                language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+                units=table_metadata_dict.get("units"),
+                data_year=table_metadata_dict.get("data_year"),
+                geography=table_metadata_dict.get("geography"),
+                bilingual_alignment=bilingual_alignment if bilingual_alignment else None,
+                embedding_allowed=False,
+            )
+            chapter_slug = slugify(block_chapter or 'unknown')
+            section_slug = slugify(block_section or 'unknown')
+            key_phrase = extract_key_phrase(chunk_content)
+            content_hash = generate_content_hash(chunk_content)
+            chunk = Chunk(
+                chunk_id=f"table_fragment_{chapter_slug}_{section_slug}_p{table_block.get('pageNumber', 0)}_{fragment_index}_{key_phrase}_{content_hash}",
+                content=chunk_content,
+                metadata=metadata,
+            )
+            table_chunks.append(chunk)
+        
+        logger.warning(f"chunk_table_block: Split very large table into {len(table_chunks)} fragments (NONE will be embedded)")
+        return summary_chunks + table_chunks
     else:
-        # Table fits in one chunk
-        logger.debug(f"chunk_table_block: Table fits in single chunk")
+        # Table fits in one chunk - ATOMIC TABLE RULE
+        logger.debug(f"chunk_table_block: Table fits in single chunk (atomic table)")
+        table_content = {"ar": ar_text, "en": en_text}
         metadata = ChunkMetadata(
             chapter=block_chapter,
             section=block_section,
@@ -939,21 +1388,30 @@ def chunk_table_block(
             page_end=table_block.get("pageNumber", 0),
             chunk_type="table",
             language=["ar", "en"] if (ar_text and en_text) else (["ar"] if ar_text else ["en"]),
+            units=table_metadata_dict.get("units"),
+            data_year=table_metadata_dict.get("data_year"),
+            geography=table_metadata_dict.get("geography"),
+            bilingual_alignment=bilingual_alignment if bilingual_alignment else None,
+            embedding_allowed=True,  # Only atomic tables can be embedded
         )
         
+        chapter_slug = slugify(block_chapter or 'unknown')
+        section_slug = slugify(block_section or 'unknown')
+        key_phrase = extract_key_phrase(table_content)
+        content_hash = generate_content_hash(table_content)
         chunk = Chunk(
-            chunk_id=f"table_{block_chapter or 'unknown'}_{table_block.get('pageNumber', 0)}",
-            content={"ar": ar_text, "en": en_text},
+            chunk_id=f"table_{chapter_slug}_{section_slug}_p{table_block.get('pageNumber', 0)}_{key_phrase}_{content_hash}",
+            content=table_content,
             metadata=metadata,
         )
         
-        # Validate table chunk
-        if validate_chunk(chunk):
-            logger.debug(f"chunk_table_block: Created and validated table chunk (id={chunk.chunk_id[:50]}...)")
-            return [chunk]
+        # Validate table chunk with deduplication check
+        if validate_chunk(chunk, table_hashes=table_hashes):
+            logger.debug(f"chunk_table_block: Created and validated atomic table chunk (id={chunk.chunk_id[:50]}...)")
+            return summary_chunks + [chunk]
         else:
             logger.warning(f"chunk_table_block: Table chunk validation failed - chunk rejected")
-            return []
+            return summary_chunks
 
 
 def merge_small_chunks_with_adjacent(
@@ -1073,13 +1531,15 @@ def merge_two_chunks(
         "page_end": max(metadata1.get("page_end", 0), metadata2.get("page_end", 0)),
     }
     
-    # Generate new chunk ID
+    # Generate new chunk ID with key phrase and hash
     chapter_slug = slugify(metadata1.get("chapter") or "unknown")
     section_slug = slugify(metadata1.get("section") or "unknown")
     page = metadata1.get("page_start", 0)
+    key_phrase = extract_key_phrase(merged_content)
+    content_hash = generate_content_hash(merged_content)
     
     return {
-        "chunk_id": f"yearbook2025_{chapter_slug}_{section_slug}_p{page}_merged",
+        "chunk_id": f"yearbook2025_{chapter_slug}_{section_slug}_p{page}_{key_phrase}_{content_hash}_merged",
         "content": merged_content,
         "metadata": merged_metadata,
     }
@@ -1189,6 +1649,705 @@ def merge_blocks_by_section(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]
     return merged
 
 
+def is_table_content(content: Dict[str, Optional[str]]) -> bool:
+    """
+    Detect if content contains table-like patterns.
+    
+    Checks for:
+    - Tab-separated values (\t)
+    - Multiple consecutive lines with similar structure (rows)
+    - Table-like patterns (headers, numeric data in columns)
+    - Markdown table syntax (| separators)
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys
+        
+    Returns:
+        True if content appears to be table data
+    """
+    ar_text = (content.get("ar") or "").strip()
+    en_text = (content.get("en") or "").strip()
+    combined_text = (ar_text + "\n" + en_text).strip()
+    
+    if not combined_text:
+        return False
+    
+    # Check for tab-separated values (strong indicator)
+    if "\t" in combined_text:
+        # Count tabs per line - tables have consistent tab counts
+        lines = combined_text.split("\n")
+        tab_counts = [line.count("\t") for line in lines if line.strip()]
+        if tab_counts and max(tab_counts) >= 2:  # At least 2 tabs (3+ columns)
+            # Check if multiple lines have similar tab counts (table structure)
+            if len(set(tab_counts)) <= 2:  # Most lines have similar structure
+                return True
+    
+    # Check for markdown table syntax (| separators)
+    if "|" in combined_text:
+        lines = combined_text.split("\n")
+        pipe_lines = [line for line in lines if "|" in line and line.strip()]
+        if len(pipe_lines) >= 2:  # At least 2 rows
+            # Check if lines have consistent pipe counts
+            pipe_counts = [line.count("|") for line in pipe_lines]
+            if len(set(pipe_counts)) <= 2:  # Consistent structure
+                return True
+    
+    # Check for structured data patterns (multiple lines with similar structure)
+    lines = [line.strip() for line in combined_text.split("\n") if line.strip()]
+    if len(lines) >= 3:  # At least 3 rows
+        # Check for numeric patterns (tables often have numeric data)
+        numeric_lines = 0
+        for line in lines:
+            # Check if line contains numbers and separators (spaces, tabs, commas)
+            if re.search(r'\d+[\s\t,]+', line):
+                numeric_lines += 1
+        
+        # If most lines have numeric patterns, likely a table
+        if numeric_lines >= len(lines) * 0.6:  # 60% of lines have numbers
+            return True
+        
+        # Check for consistent column-like structure (multiple spaces/tabs separating fields)
+        structured_lines = 0
+        for line in lines:
+            # Lines with multiple spaces/tabs separating fields
+            if len(re.split(r'[\s\t]{2,}', line)) >= 3:  # At least 3 fields
+                structured_lines += 1
+        
+        if structured_lines >= len(lines) * 0.7:  # 70% of lines are structured
+            return True
+    
+    return False
+
+
+def merge_table_fragments(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Merge table fragments that were split due to size limits.
+    
+    Detects consecutive table chunks that belong to the same table and merges them
+    back into single chunks. This happens when tables exceed the 6000 character limit
+    and are split by chunk_table_block().
+    
+    Args:
+        chunks: List of chunk dictionaries
+        
+    Returns:
+        List of chunks with table fragments merged
+    """
+    if not chunks:
+        return []
+    
+    merged = []
+    i = 0
+    fragments_merged = 0
+    
+    while i < len(chunks):
+        chunk = chunks[i]
+        metadata = chunk.get("metadata", {})
+        chunk_type = metadata.get("chunk_type", "")
+        
+        # Only process table chunks
+        if chunk_type != "table":
+            merged.append(chunk)
+            i += 1
+            continue
+        
+        # Look for consecutive table fragments to merge
+        fragment_group = [chunk]
+        base_page = metadata.get("page_start", 0)
+        base_chapter = metadata.get("chapter")
+        base_section = metadata.get("section")
+        chunk_id_base = chunk.get("chunk_id", "")
+        
+        # Check if this looks like a fragment (chunk_id suggests it might be split)
+        # Fragments often have same base ID or page number with different indices
+        j = i + 1
+        while j < len(chunks):
+            next_chunk = chunks[j]
+            next_metadata = next_chunk.get("metadata", {})
+            next_chunk_type = next_metadata.get("chunk_type", "")
+            
+            # Stop if not a table chunk
+            if next_chunk_type != "table":
+                break
+            
+            # Check if it's a fragment of the same table
+            next_page = next_metadata.get("page_start", 0)
+            next_chapter = next_metadata.get("chapter")
+            next_section = next_metadata.get("section")
+            next_chunk_id = next_chunk.get("chunk_id", "")
+            
+            # Primary check: Same chapter/section and same or adjacent page (within 2 pages)
+            # This is the most reliable indicator that chunks belong to the same table
+            is_fragment = (
+                next_chapter == base_chapter and
+                next_section == base_section and
+                abs(next_page - base_page) <= 2
+            )
+            
+            # Secondary check: Chunk ID patterns suggest fragmentation
+            # Fragments from chunk_table_block() have IDs like: table_{chapter}_{page}_{index}
+            # So fragments share the same chapter and page in their IDs
+            id_suggests_fragment = False
+            if chunk_id_base.startswith("table_") and next_chunk_id.startswith("table_"):
+                # Extract components from chunk IDs
+                base_parts = chunk_id_base.split("_")
+                next_parts = next_chunk_id.split("_")
+                
+                # If both have at least 3 parts (table_chapter_page or table_chapter_page_index)
+                if len(base_parts) >= 3 and len(next_parts) >= 3:
+                    # Check if chapter and page match (first 3 parts: table, chapter, page)
+                    if base_parts[:3] == next_parts[:3]:
+                        id_suggests_fragment = True
+                    # Or if they're both just table_page (2 parts)
+                    elif len(base_parts) == 2 and len(next_parts) == 2:
+                        if base_parts == next_parts:
+                            id_suggests_fragment = True
+            
+            if is_fragment or id_suggests_fragment:
+                fragment_group.append(next_chunk)
+                j += 1
+            else:
+                break
+        
+        # Merge fragments if we found multiple
+        if len(fragment_group) > 1:
+            # Combine content from all fragments
+            merged_ar_parts = []
+            merged_en_parts = []
+            
+            page_start = base_page
+            page_end = base_page
+            
+            for frag in fragment_group:
+                frag_content = frag.get("content", {})
+                frag_ar = frag_content.get("ar")
+                frag_en = frag_content.get("en")
+                
+                if frag_ar:
+                    merged_ar_parts.append(frag_ar)
+                if frag_en:
+                    merged_en_parts.append(frag_en)
+                
+                # Update page range
+                frag_metadata = frag.get("metadata", {})
+                frag_page_start = frag_metadata.get("page_start", 0)
+                frag_page_end = frag_metadata.get("page_end", 0)
+                page_start = min(page_start, frag_page_start)
+                page_end = max(page_end, frag_page_end)
+            
+            # Merge content (preserve table structure with newlines)
+            merged_content = {
+                "ar": "\n".join(merged_ar_parts) if merged_ar_parts else None,
+                "en": "\n".join(merged_en_parts) if merged_en_parts else None,
+            }
+            
+            # Create merged chunk
+            merged_metadata = {
+                **metadata,
+                "page_start": page_start,
+                "page_end": page_end,
+            }
+            
+            # Generate new merged chunk ID with key phrase and hash
+            chapter_slug = slugify(base_chapter or "unknown")
+            section_slug = slugify(base_section or "unknown")
+            key_phrase = extract_key_phrase(merged_content)
+            content_hash = generate_content_hash(merged_content)
+            merged_chunk_id = f"table_{chapter_slug}_{section_slug}_p{page_start}_{key_phrase}_{content_hash}_merged"
+            
+            merged_chunk = {
+                "chunk_id": merged_chunk_id,
+                "content": merged_content,
+                "metadata": merged_metadata,
+            }
+            
+            merged.append(merged_chunk)
+            fragments_merged += len(fragment_group) - 1  # Count how many chunks were merged
+            logger.info(f"merge_table_fragments: Merged {len(fragment_group)} table fragments into single chunk (pages {page_start}-{page_end})")
+            i = j
+        else:
+            # Single chunk, no merging needed
+            merged.append(chunk)
+            i += 1
+    
+    if fragments_merged > 0:
+        logger.info(f"merge_table_fragments: Merged {fragments_merged} table fragments, {len(chunks)} -> {len(merged)} chunks")
+    
+    return merged
+
+
+def reclassify_toc_to_table(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Reclassify chunks misclassified as "toc" to "table" if they contain table content.
+    
+    Some chunks are classified as "toc" based on block_type, but may actually contain
+    table data. This function detects table patterns in toc chunks and reclassifies them.
+    
+    Args:
+        chunks: List of chunk dictionaries
+        
+    Returns:
+        List of chunks with toc->table reclassifications applied
+    """
+    if not chunks:
+        return []
+    
+    reclassified_count = 0
+    
+    for chunk in chunks:
+        metadata = chunk.get("metadata", {})
+        chunk_type = metadata.get("chunk_type", "")
+        
+        # Only process toc chunks
+        if chunk_type != "toc":
+            continue
+        
+        # Check if content contains table patterns
+        content = chunk.get("content", {})
+        if is_table_content(content):
+            # Reclassify to table
+            metadata["chunk_type"] = "table"
+            metadata["embedding_allowed"] = True  # Tables are embedding-eligible
+            
+            chunk_id = chunk.get("chunk_id", "unknown")
+            logger.info(f"reclassify_toc_to_table: Reclassified chunk {chunk_id[:50]}... from 'toc' to 'table'")
+            reclassified_count += 1
+    
+    if reclassified_count > 0:
+        logger.info(f"reclassify_toc_to_table: Reclassified {reclassified_count} chunks from 'toc' to 'table'")
+    
+    return chunks
+
+
+def extract_table_summary(
+    table_block: Dict[str, Any],
+    page_blocks: List[Dict[str, Any]]
+) -> Optional[Dict[str, Optional[str]]]:
+    """
+    Extract preceding text blocks that describe a table as summary content.
+    
+    Looks for 1-3 preceding text blocks (paragraph/header types) on the same page
+    that likely describe the table.
+    
+    Args:
+        table_block: The table block to find summary for
+        page_blocks: All blocks from the same page (in order)
+        
+    Returns:
+        Dictionary with "ar" and "en" keys containing summary content, or None if not found
+    """
+    table_page = table_block.get("pageNumber", 0)
+    table_idx = None
+    
+    # Find table block index in page_blocks by matching page number and type
+    # Use a simple heuristic: find first table block on the same page
+    # (since we can't reliably compare block objects)
+    for idx, block in enumerate(page_blocks):
+        if (block.get("pageNumber", 0) == table_page and 
+            block.get("type") == "table"):
+            # Check if this is likely the same table by comparing content hash
+            block_content = block.get("content", {})
+            table_content = table_block.get("content", {})
+            block_ar = (block_content.get("ar") or "").strip()[:100]  # First 100 chars for comparison
+            table_ar = (table_content.get("ar") or "").strip()[:100]
+            if block_ar == table_ar or table_idx is None:  # Match or first table on page
+                table_idx = idx
+                # If we found an exact match, use it
+                if block_ar == table_ar:
+                    break
+    
+    if table_idx is None or table_idx == 0:
+        # Table not found or is first block, no preceding blocks
+        return None
+    
+    # Look for preceding text blocks (1-3 blocks before table)
+    summary_blocks = []
+    for i in range(max(0, table_idx - 3), table_idx):
+        block = page_blocks[i]
+        block_type = block.get("type", "")
+        
+        # Only include paragraph or header blocks (skip other tables, footers, etc.)
+        if block_type in ["paragraph", "header"]:
+            content = block.get("content", {})
+            ar_text = (content.get("ar") or "").strip()
+            en_text = (content.get("en") or "").strip()
+            
+            # Only include blocks with meaningful content
+            if ar_text or en_text:
+                summary_blocks.append(block)
+    
+    if not summary_blocks:
+        return None
+    
+    # Combine content from summary blocks
+    ar_parts = []
+    en_parts = []
+    
+    for block in summary_blocks:
+        content = block.get("content", {})
+        ar_text = (content.get("ar") or "").strip()
+        en_text = (content.get("en") or "").strip()
+        
+        if ar_text:
+            ar_parts.append(ar_text)
+        if en_text:
+            en_parts.append(en_text)
+    
+    return {
+        "ar": "\n\n".join(ar_parts) if ar_parts else None,
+        "en": "\n\n".join(en_parts) if en_parts else None,
+    }
+
+
+def extract_table_metadata(preceding_blocks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Extract table metadata (units, data_year, geography) from preceding text blocks.
+    
+    Parses preceding text blocks to find:
+    - Units: Measurement units like "(000 MT)", "(000 BBL)", "mm", "kg", etc.
+    - Years: 4-digit years (2020-2039 range)
+    - Geography: Governorate names, geographic areas
+    
+    Args:
+        preceding_blocks: List of text blocks that precede the table
+        
+    Returns:
+        Dictionary with keys: "units", "data_year", "geography"
+    """
+    if not preceding_blocks:
+        return {"units": None, "data_year": None, "geography": None}
+    
+    # Collect all text from preceding blocks
+    combined_text = ""
+    for block in preceding_blocks:
+        content = block.get("content", {})
+        ar_text = (content.get("ar") or "").strip()
+        en_text = (content.get("en") or "").strip()
+        if ar_text:
+            combined_text += ar_text + " "
+        if en_text:
+            combined_text += en_text + " "
+    
+    combined_text = combined_text.strip()
+    if not combined_text:
+        return {"units": None, "data_year": None, "geography": None}
+    
+    # Extract units
+    units = []
+    # Pattern for common unit formats: (000 MT), (000 BBL), etc.
+    unit_patterns = [
+        r'\(000\s+(MT|BBL|tons?|barrels?|kg|tons?)\)',  # (000 MT), (000 BBL)
+        r'\b(mm|cm|km|kg|°C|°م|%)\b',  # Standard units
+        r'\b(Million|Billion|Thousand)\b',  # Large numbers
+        r'\b(MT|BBL|tons?|barrels?|liters?|gallons?)\b',  # Unit abbreviations
+    ]
+    
+    for pattern in unit_patterns:
+        matches = re.findall(pattern, combined_text, re.IGNORECASE)
+        for match in matches:
+            if isinstance(match, tuple):
+                unit = match[0] if match[0] else match[1] if len(match) > 1 else ""
+            else:
+                unit = match
+            if unit and unit not in units:
+                units.append(unit)
+    
+    # Extract years (2020-2039 range)
+    years = []
+    year_pattern = r'\b(20[0-3][0-9])\b'
+    year_matches = re.findall(year_pattern, combined_text)
+    for year_str in year_matches:
+        year = int(year_str)
+        if 2020 <= year <= 2039 and year not in years:
+            years.append(year)
+    years.sort(reverse=True)  # Most recent first
+    
+    # Extract geography
+    geography = []
+    # Common geographic terms
+    geo_patterns = [
+        r'\b(Muscat|Dhofar|Al\s+Batinah|Ash\s+Sharqiyah|Al\s+Dakhiliyah|Al\s+Wusta|Al\s+Buraymi|Musandam)\s+(Governorate|Wilayat)?\b',
+        r'\b(Oman|Sultanate\s+of\s+Oman)\b',
+        r'\b(Governorate|Wilayat)\b',
+    ]
+    
+    # Arabic geographic terms
+    geo_ar_patterns = [
+        r'محافظة\s+([^\s]+)',  # محافظة followed by name
+        r'ولاية\s+([^\s]+)',  # ولاية followed by name
+        r'(مسقط|ظفار|الباطنة|الشرقية|الداخلية|الوسطى|البريمي|مسندم)',
+        r'(عمان|سلطنة\s+عمان)',
+    ]
+    
+    for pattern in geo_patterns + geo_ar_patterns:
+        matches = re.findall(pattern, combined_text, re.IGNORECASE)
+        for match in matches:
+            if isinstance(match, tuple):
+                geo = match[0] if match[0] else match
+            else:
+                geo = match
+            if geo and geo.strip() and geo.strip() not in geography:
+                geography.append(geo.strip())
+    
+    # Also check for governorate indicators using existing function
+    for block in preceding_blocks:
+        content = block.get("content", {})
+        ar_text = (content.get("ar") or "").strip()
+        en_text = (content.get("en") or "").strip()
+        for line in (ar_text + "\n" + en_text).split("\n"):
+            if is_governorate(line):
+                # Extract the governorate name
+                gov_match = re.search(r'(Governorate|Wilayat|محافظة|ولاية)\s*:?\s*([^\n,]+)', line, re.IGNORECASE)
+                if gov_match:
+                    gov_name = gov_match.group(2).strip()
+                    if gov_name and gov_name not in geography:
+                        geography.append(gov_name)
+    
+    return {
+        "units": units if units else None,
+        "data_year": years if years else None,
+        "geography": geography if geography else None,
+    }
+
+
+def split_governorate_table(
+    table_content: Dict[str, Optional[str]],
+    table_metadata: Dict[str, Any],
+    block_chapter: Optional[str],
+    block_section: Optional[str],
+    page_num: int,
+) -> List[Dict[str, Any]]:
+    """
+    Split multi-governorate tables into one chunk per governorate.
+    
+    Detects multiple governorates in table content and creates separate chunks
+    for each, preserving identical structure.
+    
+    Args:
+        table_content: Dictionary with "ar" and "en" keys containing table content
+        table_metadata: Table metadata dictionary
+        block_chapter: Chapter name
+        block_section: Section name
+        page_num: Page number
+        
+    Returns:
+        List of chunk dictionaries, one per governorate (or single chunk if no split needed)
+    """
+    ar_text = (table_content.get("ar") or "").strip()
+    en_text = (table_content.get("en") or "").strip()
+    combined_text = f"{ar_text}\n{en_text}"
+    
+    # Detect governorate indicators
+    governorate_patterns = [
+        r'(Muscat|Dhofar|Al\s+Batinah|Ash\s+Sharqiyah|Al\s+Dakhiliyah|Al\s+Wusta|Al\s+Buraymi|Musandam)\s+(Governorate|Wilayat)?',
+        r'محافظة\s+(مسقط|ظفار|الباطنة|الشرقية|الداخلية|الوسطى|البريمي|مسندم)',
+        r'ولاية\s+([^\n]+)',
+    ]
+    
+    governorate_matches = []
+    for pattern in governorate_patterns:
+        matches = re.finditer(pattern, combined_text, re.IGNORECASE | re.MULTILINE)
+        for match in matches:
+            gov_name = match.group(1) if match.group(1) else match.group(2) if len(match.groups()) > 1 else match.group(0)
+            if gov_name:
+                governorate_matches.append((match.start(), gov_name.strip()))
+    
+    # If no governorates detected or only one, return single chunk
+    if len(governorate_matches) <= 1:
+        return [{
+            "content": table_content,
+            "metadata": table_metadata,
+            "governorate": None,
+        }]
+    
+    # Sort by position
+    governorate_matches.sort(key=lambda x: x[0])
+    
+    # Split table by governorate boundaries
+    chunks = []
+    for i, (pos, gov_name) in enumerate(governorate_matches):
+        # Determine boundaries
+        start_pos = pos
+        end_pos = governorate_matches[i + 1][0] if i + 1 < len(governorate_matches) else len(combined_text)
+        
+        # Extract governorate-specific content (simplified - preserve full table structure)
+        # For now, create chunks with same content but different geography metadata
+        # This is a simplified implementation - full implementation would parse table rows
+        chunk_content = table_content.copy()
+        
+        # Update metadata with specific governorate
+        chunk_metadata = table_metadata.copy()
+        chunk_metadata["geography"] = [gov_name]
+        
+        chunks.append({
+            "content": chunk_content,
+            "metadata": chunk_metadata,
+            "governorate": gov_name,
+        })
+    
+    logger.info(f"split_governorate_table: Split table into {len(chunks)} governorate-specific chunks")
+    return chunks
+
+
+def extract_bilingual_alignment(table_content: Dict[str, Optional[str]]) -> Dict[str, str]:
+    """
+    Extract bilingual alignment mapping from table content.
+    
+    Identifies Arabic-English term pairs in table content and creates
+    a mapping dictionary (Arabic -> English).
+    
+    Args:
+        table_content: Dictionary with "ar" and "en" keys containing table content
+        
+    Returns:
+        Dictionary mapping Arabic terms to English terms: {"arabic": "english"}
+    """
+    alignment: Dict[str, str] = {}
+    
+    # Get combined content (tables often have mixed content in "ar" field)
+    ar_text = (table_content.get("ar") or "").strip()
+    en_text = (table_content.get("en") or "").strip()
+    
+    # Combine both fields for analysis
+    combined_text = ar_text
+    if en_text and en_text not in ar_text:
+        combined_text += "\n" + en_text
+    
+    if not combined_text:
+        return alignment
+    
+    # Split by lines (tables are typically line-based)
+    lines = combined_text.split("\n")
+    
+    # Pattern to detect Arabic text
+    arabic_pattern = re.compile(r'[\u0600-\u06FF]+')
+    # Pattern to detect English words (multi-word terms)
+    english_pattern = re.compile(r'\b[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*\b')
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        
+        # Find all Arabic segments
+        arabic_matches = arabic_pattern.findall(line)
+        # Find all English segments (multi-word terms)
+        english_matches = english_pattern.findall(line)
+        
+        # If we have both Arabic and English on the same line, create alignments
+        if arabic_matches and english_matches:
+            # For each Arabic term, find the closest English term
+            for ar_term in arabic_matches:
+                if len(ar_term) < 2:  # Skip very short Arabic terms
+                    continue
+                
+                # Find closest English term (simple heuristic: first English term on line)
+                if english_matches:
+                    en_term = english_matches[0]
+                    # Only create alignment if not already exists or if this is a better match
+                    if ar_term not in alignment or len(en_term) > len(alignment.get(ar_term, "")):
+                        alignment[ar_term] = en_term
+        
+        # Also check for tab-separated format (common in tables)
+        if "\t" in line:
+            cells = line.split("\t")
+            for i, cell in enumerate(cells):
+                cell = cell.strip()
+                if not cell:
+                    continue
+                
+                # Check if cell contains Arabic
+                ar_in_cell = arabic_pattern.findall(cell)
+                # Check adjacent cells for English
+                if ar_in_cell and i + 1 < len(cells):
+                    next_cell = cells[i + 1].strip()
+                    en_in_next = english_pattern.findall(next_cell)
+                    if en_in_next:
+                        for ar_term in ar_in_cell:
+                            if len(ar_term) >= 2:
+                                alignment[ar_term] = en_in_next[0]
+                
+                # Also check previous cell
+                if ar_in_cell and i > 0:
+                    prev_cell = cells[i - 1].strip()
+                    en_in_prev = english_pattern.findall(prev_cell)
+                    if en_in_prev:
+                        for ar_term in ar_in_cell:
+                            if len(ar_term) >= 2:
+                                alignment[ar_term] = en_in_prev[0]
+        
+        # Check for parentheses pattern: "English (Arabic)" or "Arabic (English)"
+        paren_pattern = r'([A-Z][a-zA-Z\s]+)\s*\(([\u0600-\u06FF]+)\)|([\u0600-\u06FF]+)\s*\(([A-Z][a-zA-Z\s]+)\)'
+        paren_matches = re.findall(paren_pattern, line)
+        for match in paren_matches:
+            if match[0] and match[1]:  # English (Arabic)
+                alignment[match[1]] = match[0].strip()
+            elif match[2] and match[3]:  # Arabic (English)
+                alignment[match[2]] = match[3].strip()
+    
+    return alignment
+
+
+def deduplicate_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Remove exact duplicate glossary and list chunks.
+    
+    Creates content signatures for chunks and removes duplicates based on
+    exact content match (normalized whitespace) for glossary and toc chunks.
+    
+    Args:
+        chunks: List of chunk dictionaries
+        
+    Returns:
+        List of chunks with duplicates removed
+    """
+    if not chunks:
+        return []
+    
+    seen_signatures: set[str] = set()
+    deduplicated = []
+    removed_count = 0
+    
+    for chunk in chunks:
+        metadata = chunk.get("metadata", {})
+        chunk_type = metadata.get("chunk_type", "")
+        
+        # Only deduplicate glossary and toc chunks
+        if chunk_type not in ["glossary", "toc"]:
+            # Always include non-glossary/toc chunks
+            deduplicated.append(chunk)
+            continue
+        
+        # Create content signature
+        content = chunk.get("content", {})
+        ar_text = (content.get("ar") or "").strip()
+        en_text = (content.get("en") or "").strip()
+        
+        # Normalize whitespace
+        ar_text = " ".join(ar_text.split())
+        en_text = " ".join(en_text.split())
+        
+        # Create signature
+        signature = f"{ar_text}|{en_text}"
+        
+        # Check if we've seen this content before
+        if signature in seen_signatures:
+            # Duplicate found, skip it
+            chunk_id = chunk.get("chunk_id", "unknown")
+            logger.debug(f"deduplicate_chunks: Removing duplicate chunk {chunk_id[:50]}... (type={chunk_type})")
+            removed_count += 1
+            continue
+        
+        # New content, add to result and mark as seen
+        seen_signatures.add(signature)
+        deduplicated.append(chunk)
+    
+    if removed_count > 0:
+        logger.info(f"deduplicate_chunks: Removed {removed_count} duplicate chunks ({len(chunks)} -> {len(deduplicated)})")
+    
+    return deduplicated
+
+
 class ChunkWiseBilingualChunker(IChunker):
     """
     Infrastructure adapter: ChunkWise-based bilingual chunker.
@@ -1236,9 +2395,19 @@ class ChunkWiseBilingualChunker(IChunker):
         if before_merge != after_merge:
             logger.info(f"chunk_blocks: Block merging: {before_merge} -> {after_merge} blocks")
         
-        # Extract chapter/section from blocks
+        # Group blocks by page for table summary extraction
+        blocks_by_page: Dict[int, List[Dict[str, Any]]] = {}
+        for block in blocks:
+            page_num = block.get("pageNumber", 0)
+            if page_num not in blocks_by_page:
+                blocks_by_page[page_num] = []
+            blocks_by_page[page_num].append(block)
+        
+        # Extract chapter/section from blocks and track table hashes per chapter+section
         current_chapter = None
         current_section = None
+        # Track table hashes per chapter+section for deduplication
+        table_hashes_by_section: Dict[tuple, set] = {}  # (chapter, section) -> set of hashes
         
         narrative_blocks = []
         table_blocks = []
@@ -1292,14 +2461,30 @@ class ChunkWiseBilingualChunker(IChunker):
         else:
             logger.warning("chunk_blocks: No content blocks to chunk - this may indicate an issue!")
         
-        # Chunk table blocks separately
+        # Chunk table blocks separately (with preceding blocks for summary extraction)
         if table_blocks:
             logger.info(f"chunk_blocks: Processing {len(table_blocks)} table blocks")
             for table_idx, table_block in enumerate(table_blocks):
+                # Get preceding blocks from same page
+                table_page = table_block.get("pageNumber", 0)
+                preceding_blocks = blocks_by_page.get(table_page, [])
+                
+                # Get table's chapter/section for hash tracking
+                table_chapter = table_block.get("chapter") or current_chapter
+                table_section = table_block.get("section") or current_section
+                section_key = (table_chapter, table_section)
+                
+                # Get or create hash set for this chapter+section
+                if section_key not in table_hashes_by_section:
+                    table_hashes_by_section[section_key] = set()
+                table_hashes = table_hashes_by_section[section_key]
+                
                 table_chunks = chunk_table_block(
                     table_block,
-                    chapter=current_chapter,
-                    section=current_section,
+                    chapter=table_chapter,
+                    section=table_section,
+                    preceding_blocks=preceding_blocks,
+                    table_hashes=table_hashes,  # Pass hash set for deduplication
                 )
                 stats["table_chunks_created"] += len(table_chunks)
                 logger.debug(f"chunk_blocks: Table {table_idx}: Created {len(table_chunks)} chunks")
@@ -1330,6 +2515,23 @@ class ChunkWiseBilingualChunker(IChunker):
         else:
             logger.debug(f"chunk_blocks: No small chunks to merge (all {before_merge_small} chunks kept)")
         
+        # NEW: Merge table fragments that were split due to size limits
+        before_merge_tables = len(result)
+        result = merge_table_fragments(result)
+        after_merge_tables = len(result)
+        if before_merge_tables != after_merge_tables:
+            logger.info(f"chunk_blocks: Table fragment merging: {before_merge_tables} -> {after_merge_tables} chunks")
+        
+        # NEW: Reclassify toc chunks containing table content to table
+        result = reclassify_toc_to_table(result)
+        
+        # NEW: Deduplicate glossary and toc chunks
+        before_dedup = len(result)
+        result = deduplicate_chunks(result)
+        after_dedup = len(result)
+        if before_dedup != after_dedup:
+            logger.info(f"chunk_blocks: Deduplication: {before_dedup} -> {after_dedup} chunks")
+        
         # Final statistics report
         total_chunks_created = stats['narrative_chunks_created'] + stats['table_chunks_created']
         total_rejected = total_chunks_created - stats['chunks_validated']
@@ -1354,7 +2556,8 @@ class ChunkWiseBilingualChunker(IChunker):
         logger.info(f"  - Total chunks created: {total_chunks_created}")
         logger.info(f"")
         logger.info(f"POST-PROCESSING:")
-        logger.info(f"  - After small chunk merging: {len(result)} final chunks")
+        logger.info(f"  - After small chunk merging: {after_merge_small} chunks")
+        logger.info(f"  - After table fragment merging: {len(result)} final chunks")
         logger.info(f"")
         logger.info(f"VALIDATION:")
         logger.info(f"  - Chunks validated: {stats['chunks_validated']}")
