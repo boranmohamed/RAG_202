@@ -12,12 +12,16 @@ numpy>=1.24.0,<2.0.0
 regex>=2023.0.0
 
 # Bilingual Text Processing (Arabic + English)
-chunkwise>=0.1.0
+# Note: chunkwise is optional - the app has fallback mechanisms if it's not available
+# To install chunkwise (requires numpy<2.0.0, may not work with Python 3.13):
+# pip install git+https://github.com/h9-tec/ChunkWise.git
+# chunkwise>=0.1.0
 
 # FastAPI and Server
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.0.0
+python-multipart>=0.0.6
 
 # Utilities
 python-dotenv>=1.0.0
