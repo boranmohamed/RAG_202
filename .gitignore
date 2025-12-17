@@ -40,6 +40,20 @@ wheels/
 # Analysis outputs
 *_analysis.json
 
+# Project-specific output files
+chunks_output/
+extracted_text_final_best.txt
+extraction_debug_result.txt
+metadata_check_result.txt
+regex_test_result.txt
+phase3_output.json
+phase12_output.json
+*_output.json
+*_result.txt
+
+# Test/Input PDF files (uncomment if you want to ignore PDFs)
+# *.pdf
+
 # OS
 .DS_Store
 Thumbs.db
