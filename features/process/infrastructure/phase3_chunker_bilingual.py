@@ -53,7 +53,7 @@ except ImportError:
         return "mixed"
 
 
-ChunkType = Literal["narrative", "table", "table_fragment"]
+ChunkType = Literal["narrative", "table", "table_fragment", "header", "reference"]
 LangCode = Literal["ar", "en", "mixed"]
 
 # Constants for strict chunk semantics
@@ -291,6 +291,7 @@ def classify_content_type(
     
     REFINEMENT 2: Added section-aware glossary detection for better precision.
     NEW: Enforces header misclassification rules (max 200 chars, <10% numeric density).
+    NEW: Detects enumerations (governorates, stations, name lists) as reference.
     """
     if block_type == "table":
         return "table"
@@ -313,11 +314,22 @@ def classify_content_type(
             if numeric_density > MAX_NUMERIC_DENSITY_HEADER:
                 logger.warning(f"classify_content_type: Header has numeric density {numeric_density:.2%} > {MAX_NUMERIC_DENSITY_HEADER:.2%}, reclassifying to narrative")
                 return "narrative"
+            
+            # Rule 3: Headers with lists (more than 3 items) are reclassified
+            lines = [line.strip() for line in combined_text.split("\n") if line.strip()]
+            if len(lines) > 3:
+                logger.warning(f"classify_content_type: Header has {len(lines)} lines (>3), reclassifying to reference")
+                return "reference"
         
         return "header"
     
     if block_type in ["toc", "footer"]:
         return block_type
+    
+    # Check for enumerations (governorates, stations, name lists) BEFORE other checks
+    if content and looks_like_enumeration(content):
+        logger.debug(f"classify_content_type: Detected enumeration pattern, classifying as reference")
+        return "reference"
     
     # Check section context first (more reliable than patterns alone)
     if section:
@@ -348,10 +360,10 @@ def is_embedding_eligible(chunk_type: str) -> bool:
     Explicit embedding policy (CRITICAL).
     
     Makes embedding control explicit to prevent silent pollution.
-    Only narrative and table (not table_fragment) are eligible.
+    Only narrative, table, and reference (not table_fragment, not header) are eligible.
     """
-    eligible_types = {"narrative", "table"}
-    return chunk_type in eligible_types and chunk_type != "table_fragment"
+    eligible_types = {"narrative", "table", "reference"}
+    return chunk_type in eligible_types and chunk_type != "table_fragment" and chunk_type != "header"
 
 
 def dynamic_chunk_size(block_type: str) -> int:
@@ -567,6 +579,215 @@ def is_governorate(line: str) -> bool:
         True if line appears to be a governorate/wilayat indicator
     """
     return bool(re.search(r"(حمافظة|Governorate|الوالية|Wilayat)", line))
+
+
+def looks_like_enumeration(content: Dict[str, Optional[str]]) -> bool:
+    """
+    Detect if content is an enumeration/list (governorates, wilayats, stations, name lists).
+    
+    Enumerations are:
+    - Lists of names with no prose explanation
+    - Governorate/wilayat listings
+    - Ground station name blocks
+    - Repeated bilingual name lists
+    - Deterministic factual lists users may query
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys
+        
+    Returns:
+        True if content appears to be an enumeration
+    """
+    ar_text = (content.get("ar") or "").strip()
+    en_text = (content.get("en") or "").strip()
+    combined_text = f"{ar_text}\n{en_text}"
+    
+    if not combined_text.strip():
+        return False
+    
+    lines = [line.strip() for line in combined_text.split("\n") if line.strip()]
+    if len(lines) < 2:
+        return False
+    
+    # Check for governorate/wilayat enumeration patterns
+    governorate_count = sum(1 for line in lines if is_governorate(line))
+    if governorate_count >= 2:  # Multiple governorates = enumeration
+        return True
+    
+    # Check for station name patterns
+    station_patterns = [
+        r'\b(Station|محطة|محطات)\b',
+        r'\b(Ground\s+Station|محطة\s+أرضية)\b',
+    ]
+    station_count = 0
+    for line in lines:
+        for pattern in station_patterns:
+            if re.search(pattern, line, re.IGNORECASE):
+                station_count += 1
+                break
+    if station_count >= 2:
+        return True
+    
+    # Check for list-like structure (multiple lines with similar patterns)
+    # Lists typically have:
+    # - Multiple lines starting with similar patterns (numbers, bullets, names)
+    # - Low prose density (few sentences, mostly names/terms)
+    # - Repeated bilingual name pairs
+    
+    # Count lines that look like list items (short, no punctuation, name-like)
+    list_item_count = 0
+    for line in lines:
+        # Short lines (likely list items)
+        if len(line) < 100:
+            # Check if line is mostly names/terms (not prose)
+            # Prose has more punctuation, list items have less
+            punctuation_ratio = len(re.findall(r'[.!?،,;:]', line)) / len(line) if line else 0
+            if punctuation_ratio < 0.1:  # Less than 10% punctuation = likely list item
+                list_item_count += 1
+    
+    # If most lines are list-like, it's an enumeration
+    if list_item_count >= len(lines) * 0.7:  # 70% of lines are list items
+        return True
+    
+    # Check for repeated bilingual name patterns
+    # Enumerations often have Arabic name followed by English name on same or next line
+    bilingual_pair_count = 0
+    for i, line in enumerate(lines):
+        # Check if line has Arabic
+        has_arabic = bool(re.search(r'[\u0600-\u06FF]', line))
+        # Check if next line has English (and no Arabic)
+        if i + 1 < len(lines):
+            next_line = lines[i + 1]
+            has_english = bool(re.search(r'[a-zA-Z]', next_line))
+            has_arabic_next = bool(re.search(r'[\u0600-\u06FF]', next_line))
+            if has_arabic and has_english and not has_arabic_next:
+                bilingual_pair_count += 1
+    
+    if bilingual_pair_count >= 3:  # Multiple bilingual pairs = enumeration
+        return True
+    
+    return False
+
+
+def looks_like_table(content: Dict[str, Optional[str]]) -> bool:
+    """
+    Detect if content contains table-like patterns.
+    
+    Tables have:
+    - Rows + columns structure
+    - Repeated numeric alignment
+    - Year-by-month or station-by-month matrices
+    
+    Args:
+        content: Dictionary with "ar" and "en" keys
+        
+    Returns:
+        True if content appears to be a table
+    """
+    return is_table_content(content)
+
+
+def split_header(chunk: Chunk) -> List[Chunk]:
+    """
+    Split a header chunk that exceeds limits.
+    
+    Keeps ONLY the title line as header, reclassifies remaining content.
+    
+    Args:
+        chunk: Header chunk to split
+        
+    Returns:
+        List of chunks: [header_chunk, ...remaining_chunks]
+    """
+    ar_text = (chunk.content.get("ar") or "").strip()
+    en_text = (chunk.content.get("en") or "").strip()
+    
+    # Extract first line as title
+    ar_lines = ar_text.split("\n") if ar_text else []
+    en_lines = en_text.split("\n") if en_text else []
+    
+    # Get first non-empty line from each language
+    ar_title = ar_lines[0].strip() if ar_lines and ar_lines[0].strip() else ""
+    en_title = en_lines[0].strip() if en_lines and en_lines[0].strip() else ""
+    
+    # Remaining content
+    ar_remaining = "\n".join(ar_lines[1:]).strip() if len(ar_lines) > 1 else ""
+    en_remaining = "\n".join(en_lines[1:]).strip() if len(en_lines) > 1 else ""
+    
+    # Create header chunk (title only)
+    header_content = {
+        "ar": ar_title if ar_title else None,
+        "en": en_title if en_title else None,
+    }
+    
+    header_metadata = ChunkMetadata(
+        document=chunk.metadata.document,
+        year=chunk.metadata.year,
+        chapter=chunk.metadata.chapter,
+        section=chunk.metadata.section,
+        page_start=chunk.metadata.page_start,
+        page_end=chunk.metadata.page_end,
+        chunk_type="header",
+        language=chunk.metadata.language.copy() if chunk.metadata.language else [],
+        embedding_allowed=False,  # Headers never embedded
+    )
+    
+    chapter_slug = slugify(chunk.metadata.chapter or 'unknown')
+    section_slug = slugify(chunk.metadata.section or 'unknown')
+    key_phrase = extract_key_phrase(header_content)
+    content_hash = generate_content_hash(header_content)
+    
+    header_chunk = Chunk(
+        chunk_id=f"header_{chapter_slug}_{section_slug}_p{chunk.metadata.page_start}_{key_phrase}_{content_hash}",
+        content=header_content,
+        metadata=header_metadata,
+    )
+    
+    result = [header_chunk]
+    
+    # If there's remaining content, create new chunk(s) with reclassification
+    if ar_remaining or en_remaining:
+        remaining_content = {
+            "ar": ar_remaining if ar_remaining else None,
+            "en": en_remaining if en_remaining else None,
+        }
+        
+        # Reclassify remaining content
+        remaining_type = classify_content_type(
+            f"{ar_remaining}\n{en_remaining}",
+            "paragraph",  # Treat as paragraph for reclassification
+            section=chunk.metadata.section,
+            content=remaining_content,
+        )
+        
+        # If still looks like header, force to narrative
+        if remaining_type == "header":
+            remaining_type = "narrative"
+        
+        remaining_metadata = ChunkMetadata(
+            document=chunk.metadata.document,
+            year=chunk.metadata.year,
+            chapter=chunk.metadata.chapter,
+            section=chunk.metadata.section,
+            page_start=chunk.metadata.page_start,
+            page_end=chunk.metadata.page_end,
+            chunk_type=remaining_type,
+            language=chunk.metadata.language.copy() if chunk.metadata.language else [],
+            embedding_allowed=is_embedding_eligible(remaining_type),
+        )
+        
+        key_phrase_remaining = extract_key_phrase(remaining_content)
+        content_hash_remaining = generate_content_hash(remaining_content)
+        
+        remaining_chunk = Chunk(
+            chunk_id=f"{remaining_type}_{chapter_slug}_{section_slug}_p{chunk.metadata.page_start}_{key_phrase_remaining}_{content_hash_remaining}",
+            content=remaining_content,
+            metadata=remaining_metadata,
+        )
+        
+        result.append(remaining_chunk)
+    
+    return result
 
 
 def is_table_indicator(line: str) -> bool:
@@ -845,6 +1066,63 @@ def split_bilingual_content(chunk_text: str, original_content: Dict[str, Optiona
     return {"ar": chunk_text, "en": None}
 
 
+def normalize_chunk_type(chunk: Chunk) -> List[Chunk]:
+    """
+    Automatic reclassification pass after initial chunk creation.
+    
+    Enforces:
+    - Headers > 200 chars are split
+    - Enumerations are reclassified to reference
+    - Tables are correctly identified (never narrative)
+    
+    Args:
+        chunk: Chunk to normalize
+        
+    Returns:
+        List of chunks (may be split if header exceeds limits)
+    """
+    # Rule 1: Split headers that exceed limits
+    if chunk.metadata.chunk_type == "header":
+        ar_text = (chunk.content.get("ar") or "").strip()
+        en_text = (chunk.content.get("en") or "").strip()
+        total_chars = len(ar_text) + len(en_text)
+        
+        if total_chars > MAX_HEADER_CHARS:
+            logger.warning(f"normalize_chunk_type: Header chunk exceeds {MAX_HEADER_CHARS} chars ({total_chars}), splitting")
+            return split_header(chunk)
+        
+        # Check for paragraphs (multiple lines with prose)
+        lines = [line.strip() for line in f"{ar_text}\n{en_text}".split("\n") if line.strip()]
+        if len(lines) > 3:
+            logger.warning(f"normalize_chunk_type: Header has {len(lines)} lines (>3), splitting")
+            return split_header(chunk)
+        
+        # Check numeric density
+        combined_text = f"{ar_text} {en_text}"
+        numeric_density = calculate_numeric_density(combined_text)
+        if numeric_density > MAX_NUMERIC_DENSITY_HEADER:
+            logger.warning(f"normalize_chunk_type: Header has numeric density {numeric_density:.2%} > {MAX_NUMERIC_DENSITY_HEADER:.2%}, splitting")
+            return split_header(chunk)
+    
+    # Rule 2: Reclassify enumerations to reference
+    if chunk.metadata.chunk_type != "reference" and looks_like_enumeration(chunk.content):
+        logger.info(f"normalize_chunk_type: Reclassifying chunk from {chunk.metadata.chunk_type} to reference (enumeration detected)")
+        chunk.metadata.chunk_type = "reference"
+        chunk.metadata.embedding_allowed = True
+    
+    # Rule 3: Reclassify tables misclassified as narrative
+    if chunk.metadata.chunk_type == "narrative" and looks_like_table(chunk.content):
+        logger.warning(f"normalize_chunk_type: Reclassifying chunk from narrative to table (table pattern detected)")
+        chunk.metadata.chunk_type = "table"
+        chunk.metadata.embedding_allowed = True
+    
+    # Rule 4: Ensure headers never have embedding_allowed=True
+    if chunk.metadata.chunk_type == "header":
+        chunk.metadata.embedding_allowed = False
+    
+    return [chunk]
+
+
 def validate_chunk(chunk: Chunk, table_hashes: Optional[set] = None) -> bool:
     """
     Enhanced validation with all strict chunk semantics rules.
@@ -957,19 +1235,46 @@ def validate_chunk(chunk: Chunk, table_hashes: Optional[set] = None) -> bool:
             logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - too short (length={total_length} < 20)")
             return False
     
-    # RULE 5: Embedding policy guardrails with runtime assertion
+    # RULE 5: Fail-fast safety guards - no header chunks embedded
+    if chunk.metadata.chunk_type == "header" and chunk.metadata.embedding_allowed:
+        logger.error(f"validate_chunk: FAIL-FAST: Header chunk has embedding_allowed=True (violation)")
+        return False
+    
+    # RULE 6: Fail-fast safety guards - no header chunks > 200 chars
+    if chunk.metadata.chunk_type == "header":
+        total_chars = len(ar_text) + len(en_text)
+        if total_chars > MAX_HEADER_CHARS:
+            logger.error(f"validate_chunk: FAIL-FAST: Header chunk exceeds {MAX_HEADER_CHARS} chars ({total_chars})")
+            return False
+    
+    # RULE 7: Fail-fast safety guards - no tables labeled as narrative
+    if chunk.metadata.chunk_type == "narrative" and looks_like_table(chunk.content):
+        logger.error(f"validate_chunk: FAIL-FAST: Table content labeled as narrative (violation)")
+        return False
+    
+    # RULE 8: Fail-fast safety guards - no governorate lists labeled as header
+    if chunk.metadata.chunk_type == "header" and looks_like_enumeration(chunk.content):
+        logger.error(f"validate_chunk: FAIL-FAST: Enumeration content labeled as header (violation)")
+        return False
+    
+    # RULE 9: Embedding policy guardrails with runtime assertion
     if chunk.metadata.embedding_allowed:
-        if chunk.metadata.chunk_type not in {"narrative", "table"}:
+        if chunk.metadata.chunk_type not in {"narrative", "table", "reference"}:
             logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - embedding_allowed=True but chunk_type={chunk.metadata.chunk_type} not eligible")
             return False
         if chunk.metadata.chunk_type == "table_fragment":
             logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - table_fragment cannot have embedding_allowed=True")
             return False
-        # Runtime assertion: Only narrative and table (not table_fragment) can be embedded
-        assert chunk.metadata.chunk_type in {"narrative", "table"}, \
+        if chunk.metadata.chunk_type == "header":
+            logger.warning(f"validate_chunk: Chunk {chunk_id_short}: Validation failed - header cannot have embedding_allowed=True")
+            return False
+        # Runtime assertion: Only narrative, table, and reference (not table_fragment, not header) can be embedded
+        assert chunk.metadata.chunk_type in {"narrative", "table", "reference"}, \
             f"Embedding policy violation: chunk_type={chunk.metadata.chunk_type} cannot be embedded"
         assert chunk.metadata.chunk_type != "table_fragment", \
             f"Embedding policy violation: table_fragment cannot be embedded"
+        assert chunk.metadata.chunk_type != "header", \
+            f"Embedding policy violation: header cannot be embedded"
     
     logger.debug(f"validate_chunk: Chunk {chunk_id_short}: Validation passed (type={chunk.metadata.chunk_type}, ar_len={len(ar_text)}, en_len={len(en_text)})")
     return True
@@ -1115,13 +1420,17 @@ def chunk_section_blocks(
                 metadata=metadata,
             )
             
+            # AUTOMATIC RECLASSIFICATION: Normalize chunk type (split headers, reclassify enumerations/tables)
+            normalized_chunks = normalize_chunk_type(chunk)
+            
             # Rule 15: Validate before adding
-            if validate_chunk(chunk):
-                section_chunks.append(chunk)
-                logger.debug(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Created and validated (id={chunk.chunk_id[:50]}...)")
-            else:
-                logger.warning(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Validation failed - chunk rejected")
-                rejected_chunks += 1
+            for normalized_chunk in normalized_chunks:
+                if validate_chunk(normalized_chunk):
+                    section_chunks.append(normalized_chunk)
+                    logger.debug(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Created and validated (id={normalized_chunk.chunk_id[:50]}..., type={normalized_chunk.metadata.chunk_type})")
+                else:
+                    logger.warning(f"chunk_section_blocks: Block {block_idx}, Chunk {i}: Validation failed - chunk rejected")
+                    rejected_chunks += 1
     
     logger.info(f"chunk_section_blocks: Complete - {len(section_chunks)} chunks created ({skipped_blocks} blocks skipped, {empty_blocks} blocks empty, {invalid_blocks} blocks invalid, {rejected_chunks} chunks rejected)")
     return section_chunks
@@ -2288,6 +2597,87 @@ def extract_bilingual_alignment(table_content: Dict[str, Optional[str]]) -> Dict
     return alignment
 
 
+def fail_fast_safety_check(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Fail-fast safety guards before upserting to vector store.
+    
+    Enforces critical rules:
+    - No header chunks are embedded
+    - No header chunks exceed 200 chars
+    - No tables are labeled as narrative
+    - No governorate lists are labeled as header
+    
+    Args:
+        chunks: List of chunk dictionaries
+        
+    Returns:
+        List of chunks with violations removed or reclassified
+    """
+    if not chunks:
+        return []
+    
+    safe_chunks = []
+    violations = {
+        "header_embedded": 0,
+        "header_too_large": 0,
+        "table_as_narrative": 0,
+        "enumeration_as_header": 0,
+    }
+    
+    for chunk in chunks:
+        metadata = chunk.get("metadata", {})
+        chunk_type = metadata.get("chunk_type", "")
+        content = chunk.get("content", {})
+        embedding_allowed = metadata.get("embedding_allowed", False)
+        
+        ar_text = (content.get("ar") or "").strip()
+        en_text = (content.get("en") or "").strip()
+        total_chars = len(ar_text) + len(en_text)
+        
+        # Guard 1: No header chunks embedded
+        if chunk_type == "header" and embedding_allowed:
+            logger.error(f"fail_fast_safety_check: FAIL-FAST violation: Header chunk has embedding_allowed=True - dropping chunk {chunk.get('chunk_id', 'unknown')[:50]}")
+            violations["header_embedded"] += 1
+            continue  # Drop the chunk
+        
+        # Guard 2: No header chunks > 200 chars
+        if chunk_type == "header" and total_chars > MAX_HEADER_CHARS:
+            logger.error(f"fail_fast_safety_check: FAIL-FAST violation: Header chunk exceeds {MAX_HEADER_CHARS} chars ({total_chars}) - dropping chunk {chunk.get('chunk_id', 'unknown')[:50]}")
+            violations["header_too_large"] += 1
+            continue  # Drop the chunk
+        
+        # Guard 3: No tables labeled as narrative
+        if chunk_type == "narrative" and looks_like_table(content):
+            logger.warning(f"fail_fast_safety_check: Reclassifying table mislabeled as narrative - chunk {chunk.get('chunk_id', 'unknown')[:50]}")
+            metadata["chunk_type"] = "table"
+            metadata["embedding_allowed"] = True
+            violations["table_as_narrative"] += 1
+            # Reclassify, don't drop
+        
+        # Guard 4: No enumerations labeled as header
+        if chunk_type == "header" and looks_like_enumeration(content):
+            logger.warning(f"fail_fast_safety_check: Reclassifying enumeration mislabeled as header - chunk {chunk.get('chunk_id', 'unknown')[:50]}")
+            metadata["chunk_type"] = "reference"
+            metadata["embedding_allowed"] = True
+            violations["enumeration_as_header"] += 1
+            # Reclassify, don't drop
+        
+        safe_chunks.append(chunk)
+    
+    # Log summary
+    total_violations = sum(violations.values())
+    if total_violations > 0:
+        logger.warning(f"fail_fast_safety_check: Found {total_violations} violations:")
+        for violation_type, count in violations.items():
+            if count > 0:
+                logger.warning(f"  - {violation_type}: {count}")
+        logger.warning(f"fail_fast_safety_check: {len(chunks)} -> {len(safe_chunks)} chunks after safety check")
+    else:
+        logger.debug(f"fail_fast_safety_check: All {len(chunks)} chunks passed safety checks")
+    
+    return safe_chunks
+
+
 def deduplicate_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Remove exact duplicate glossary and list chunks.
@@ -2531,6 +2921,13 @@ class ChunkWiseBilingualChunker(IChunker):
         after_dedup = len(result)
         if before_dedup != after_dedup:
             logger.info(f"chunk_blocks: Deduplication: {before_dedup} -> {after_dedup} chunks")
+        
+        # CRITICAL: Fail-fast safety guards before vector store upsert
+        before_safety = len(result)
+        result = fail_fast_safety_check(result)
+        after_safety = len(result)
+        if before_safety != after_safety:
+            logger.warning(f"chunk_blocks: Safety check: {before_safety} -> {after_safety} chunks (violations removed/reclassified)")
         
         # Final statistics report
         total_chunks_created = stats['narrative_chunks_created'] + stats['table_chunks_created']
