@@ -6,7 +6,7 @@ Infrastructure adapters (e.g., ChunkWiseBilingualChunker) implement this interfa
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class IChunker(ABC):
@@ -21,6 +21,7 @@ class IChunker(ABC):
         max_chars: int = 1500,
         min_chars: int = 50,
         overlap_chars: int = 100,
+        pdf_path: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Chunk normalized blocks from Phase 2 into semantic chunks.
@@ -38,6 +39,7 @@ class IChunker(ABC):
             max_chars: Maximum characters per chunk (~1500 per language block)
             min_chars: Minimum characters per chunk
             overlap_chars: Overlap between chunks in characters
+            pdf_path: Optional PDF path for table serialization with pdfplumber
         
         Returns:
             List of validated chunks ready for Phase 4 (embeddings)

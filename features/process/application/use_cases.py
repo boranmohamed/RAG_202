@@ -139,6 +139,7 @@ class ChunkingUseCase:
             max_chars=request.max_chars,
             min_chars=request.min_chars,
             overlap_chars=request.overlap_chars,
+            pdf_path=request.pdf_path,
         )
         logger.info(f"ChunkingUseCase.execute: Phase 3 complete - {len(chunks_dicts)} chunks created")
         
@@ -243,6 +244,7 @@ class ExtractOcrFullPipelineUseCase:
             max_chars=request.max_chars,
             min_chars=request.min_chars,
             overlap_chars=request.overlap_chars,
+            pdf_path=request.pdf_path,  # Pass PDF path for table serialization
         )
         logger.info(f"ExtractOcrFullPipelineUseCase.execute: Phase 3 complete - {len(chunks_dicts)} chunks created")
 

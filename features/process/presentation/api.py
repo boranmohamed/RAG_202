@@ -317,6 +317,7 @@ async def chunk_blocks(
             max_chars=max_chars,
             min_chars=min_chars,
             overlap_chars=overlap_chars,
+            pdf_path=temp_path,  # Pass PDF path for table serialization
         )
         
         logger.info(f"API: Passing {len(extract_dto_out.blocks)} blocks to chunking phase")

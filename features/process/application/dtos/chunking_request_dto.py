@@ -3,7 +3,7 @@ DTO for chunking request.
 """
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from .normalized_block_dto import NormalizedBlockDTO
 
@@ -21,4 +21,5 @@ class ChunkingRequestDTO:
     max_chars: int = 1500  # Maximum characters per chunk (~1500 per language block)
     min_chars: int = 50  # Minimum characters per chunk
     overlap_chars: int = 100  # Overlap between chunks in characters
+    pdf_path: Optional[str] = None  # Optional PDF path for table serialization with pdfplumber
 

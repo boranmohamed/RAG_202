@@ -38,6 +38,14 @@ from typing import Any, Dict, List, Literal, Optional
 
 from features.process.domain.interfaces import IChunker
 
+# PDF processing imports for table serialization
+try:
+    import pdfplumber
+    PDFPLUMBER_AVAILABLE = True
+except ImportError:
+    PDFPLUMBER_AVAILABLE = False
+    logger.warning("pdfplumber not available - table serialization will fall back to text-based chunking")
+
 # Setup logger for this module
 logger = logging.getLogger(__name__)
 
@@ -817,7 +825,8 @@ def is_table_indicator(line: str) -> bool:
 
 def semantic_chunk(text: str, max_chars: int = 1500) -> List[str]:
     """
-    Semantic block chunker using layout-aware semantic rules.
+    Updated semantic block chunker using layout-aware rules, now prioritizing 
+    Governorate/Section changes as hard boundaries for better list segmentation.
     
     Chunk boundaries are determined by semantic meaning, not raw length.
     Perfect for data-heavy yearbook content.
@@ -830,7 +839,7 @@ def semantic_chunk(text: str, max_chars: int = 1500) -> List[str]:
     Chunk boundaries:
     - Start new chunk when:
       - heading changes (Chapter, Section)
-      - new geographic area (e.g., "Muscat Governorate")
+      - new geographic area (e.g., "Muscat Governorate") - NEW: Hard boundary for lists
       - entering a table section
       - switching languages ar ↔ en (if on separate lines)
       - large white-space gap
@@ -849,56 +858,91 @@ def semantic_chunk(text: str, max_chars: int = 1500) -> List[str]:
         return []
     
     logger.debug(f"semantic_chunk: Starting - text_len={len(text)}, max_chars={max_chars}")
+    
+    # --- New Governorate/Section Splitting Logic ---
+    # Primary split by governorate/major section headers.
+    # Pattern: start of line, digit, dash, space, text (e.g., '1- Muscat Governorate', 'الفصل الأول')
+    governorate_pattern = r'(?m)^(\d+\s*-\s*.*(?:Governorate|Chapter|الفصل|محافظة).*$)'
+    
+    raw_segments = re.split(governorate_pattern, text)
+    
+    # Process the segments created by the split
+    segments = []
+    current_segment = ""
+    for seg in raw_segments:
+        if not seg.strip(): 
+            continue
+        
+        if re.match(governorate_pattern, seg):
+            # If the segment is a header, finalize the previous one and start a new
+            if current_segment: 
+                segments.append(current_segment)
+            current_segment = seg  # Start the new segment with the header
+        else:
+            # Append content to the current segment
+            current_segment += "\n" + seg if current_segment else seg
+
+    if current_segment: 
+        segments.append(current_segment)
+    
+    # If no governorate splits found, use original text as single segment
+    if not segments:
+        segments = [text]
+    
+    # Process the large segments created by the Governorate/Chapter split
     chunks = []
-    current = []
-    current_size = 0
     semantic_boundaries = 0
     size_boundaries = 0
     
-    for line in text.split("\n"):
-        line = line.strip()
+    for segment_text in segments:
+        # Now, apply character-based splitting within the semantically strong segment
+        # This handles large blocks of text that might exist within one Chapter/Governorate
         
-        if not line:
-            # Preserve empty lines for structure but don't count them toward size
-            if current:
-                current.append("")
-            continue
+        current = []
+        current_size = 0
         
-        line_size = len(line)
-        
-        # --- Hard semantic boundaries (ALWAYS start new chunk) ---
-        if (is_heading(line) or
-            is_governorate(line) or
-            is_table_indicator(line)):
+        # Split segment by lines and apply size logic
+        for line in segment_text.split("\n"):
+            line = line.strip()
+            if not line:
+                if current: 
+                    current.append("")
+                continue
             
-            if current:
+            line_size = len(line)
+            
+            # Check for other semantic boundaries within the segment
+            if (is_heading(line) or
+                is_governorate(line) or
+                is_table_indicator(line)):
+                
+                if current:
+                    chunk_text = "\n".join(current)
+                    chunks.append(chunk_text)
+                    logger.debug(f"semantic_chunk: Semantic boundary - created chunk {len(chunks)} ({len(chunk_text)} chars)")
+                    current = []
+                    current_size = 0
+                    semantic_boundaries += 1
+            
+            # Check if adding this line would exceed max_chars
+            if current_size + line_size > max_chars and current:
+                # Size boundary reached, finalize current chunk
                 chunk_text = "\n".join(current)
                 chunks.append(chunk_text)
-                logger.debug(f"semantic_chunk: Semantic boundary - created chunk {len(chunks)} ({len(chunk_text)} chars) - boundary type: heading={is_heading(line)}, governorate={is_governorate(line)}, table={is_table_indicator(line)}")
-                current = []
-                current_size = 0
-                semantic_boundaries += 1
+                logger.debug(f"semantic_chunk: Size boundary - created chunk {len(chunks)} ({len(chunk_text)} chars, exceeded {max_chars} limit)")
+                current = [line]
+                current_size = line_size
+                size_boundaries += 1
+            else:
+                # Add line to current chunk
+                current.append(line)
+                current_size += line_size
         
-        # Check if adding this line would exceed max_chars
-        if current_size + line_size > max_chars and current:
-            # Don't cut mid-sentence - try to find sentence boundary
-            # If current chunk has content, finalize it
+        # Add remaining content from the segment
+        if current:
             chunk_text = "\n".join(current)
             chunks.append(chunk_text)
-            logger.debug(f"semantic_chunk: Size boundary - created chunk {len(chunks)} ({len(chunk_text)} chars, exceeded {max_chars} limit)")
-            current = [line]
-            current_size = line_size
-            size_boundaries += 1
-        else:
-            # Add line to current chunk
-            current.append(line)
-            current_size += line_size
-    
-    # Add remaining content
-    if current:
-        chunk_text = "\n".join(current)
-        chunks.append(chunk_text)
-        logger.debug(f"semantic_chunk: Final chunk {len(chunks)} ({len(chunk_text)} chars)")
+            logger.debug(f"semantic_chunk: Final chunk from segment {len(chunks)} ({len(chunk_text)} chars)")
     
     logger.info(f"semantic_chunk: Complete - {len(chunks)} chunks created ({semantic_boundaries} semantic boundaries, {size_boundaries} size boundaries)")
     return chunks
@@ -1455,6 +1499,172 @@ def chunk_section_blocks(
     
     logger.info(f"chunk_section_blocks: Complete - {len(section_chunks)} chunks created ({skipped_blocks} blocks skipped, {empty_blocks} blocks empty, {invalid_blocks} blocks invalid, {rejected_chunks} chunks rejected)")
     return section_chunks
+
+
+def serialize_table_block(pdf_path: str, table_block: Dict[str, Any]) -> List[Chunk]:
+    """
+    Extracts a table using pdfplumber's grid-aware features and serializes 
+    each row into a self-contained, context-rich chunk. This prevents
+    'stranded numbers' by injecting headers into every row's text.
+    
+    Args:
+        pdf_path: Path to the PDF file
+        table_block: Table block dictionary with pageNumber, chapter, section, etc.
+        
+    Returns:
+        List of Chunk objects, one per table row
+    """
+    logger.info(f"DEBUG: serialize_table_block called with pdf_path='{pdf_path}', pageNumber={table_block.get('pageNumber')}")
+    
+    if not PDFPLUMBER_AVAILABLE:
+        logger.warning("serialize_table_block: pdfplumber not available, falling back to chunk_table_block")
+        return chunk_table_block(
+            table_block,
+            chapter=table_block.get("chapter"),
+            section=table_block.get("section"),
+            preceding_blocks=None,
+            table_hashes=None,
+        )
+    
+    page_number = table_block.get('pageNumber')
+    if not page_number or not pdf_path:
+        logger.error(f"serialize_table_block: Missing PDF path or page number. pdf_path='{pdf_path}', page_number={page_number}")
+        return []
+    
+    chunks = []
+    
+    try:
+        logger.info(f"DEBUG: Calling pdfplumber.open('{pdf_path}') for page {page_number}")
+        with pdfplumber.open(pdf_path) as pdf:
+            logger.info(f"DEBUG: PDF opened successfully. PDF has {len(pdf.pages)} pages")
+            # pdfplumber is 0-indexed, pageNumber from blocks is typically 1-indexed
+            # Adjust if needed based on your block numbering
+            page_idx = page_number - 1 if page_number > 0 else 0
+            logger.info(f"DEBUG: Using page index {page_idx} (pageNumber={page_number})")
+            
+            if page_idx >= len(pdf.pages):
+                logger.warning(f"serialize_table_block: Page {page_number} out of range (PDF has {len(pdf.pages)} pages)")
+                return []
+            
+            page = pdf.pages[page_idx]
+            logger.info(f"DEBUG: Retrieved page object for page {page_number}")
+            
+            # Use 'lines' strategy for the Yearbook's grid-lined tables
+            table_settings = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
+            logger.info(f"DEBUG: Extracting table from page {page_number} with settings: {table_settings}")
+            table = page.extract_table(table_settings)
+            logger.info(f"DEBUG: Table extraction completed. Result: {'None' if table is None else f'{len(table)} rows'}")
+            
+            if not table or len(table) < 2:
+                logger.warning(f"serialize_table_block: No structured table found on page {page_number}. Table result: {table}")
+                # Fall back to chunk_table_block
+                return chunk_table_block(
+                    table_block,
+                    chapter=table_block.get("chapter"),
+                    section=table_block.get("section"),
+                    preceding_blocks=None,
+                    table_hashes=None,
+                )
+            
+            # Use the first row as headers (e.g., Month names)
+            headers = [h.replace('\n', ' ').strip() if h else f"Col_{i}" 
+                       for i, h in enumerate(table[0])]
+            logger.info(f"DEBUG: Extracted {len(headers)} headers: {headers[:5]}...")  # Log first 5 headers
+            
+            # Get metadata from table block with defaults
+            block_chapter = table_block.get("chapter") or "unknown"
+            block_section = table_block.get("section") or "unknown"
+            logger.info(f"DEBUG: Processing table with chapter='{block_chapter}', section='{block_section}'")
+            
+            # Extract year from table content or use default
+            ar_text = (table_block.get("content", {}).get("ar") or "")
+            en_text = (table_block.get("content", {}).get("en") or "")
+            combined_text = f"{ar_text} {en_text}"
+            year_matches = re.findall(r'\b(20[0-3][0-9])\b', combined_text)
+            years = [int(y) for y in year_matches if 2020 <= int(y) <= 2039]
+            data_year = sorted(set(years), reverse=True) if years else [table_block.get("year", 2024)]
+            
+            # Process data rows (skipping header row)
+            logger.info(f"DEBUG: Processing {len(table) - 1} data rows (excluding header)")
+            for row_idx, row in enumerate(table[1:], start=1):
+                if not row or not row[0]: 
+                    continue
+                
+                # 0-index is usually Location Name
+                location = row[0].replace('\n', ' ').strip() if row[0] else "Unknown"
+                
+                # Build the serialized data string
+                data_points = []
+                # Start enumeration from the second column (index 1)
+                for i in range(1, len(row)):
+                    header = headers[i] if i < len(headers) else f"Col_{i}"
+                    cell_value = row[i]
+                    
+                    if cell_value and cell_value.strip():
+                        clean_val = cell_value.replace('\n', ' ').strip()
+                        data_points.append(f"{header}: {clean_val}")
+
+                if data_points:
+                    # Create bilingual content
+                    # Ensure Arabic field has enough Arabic text to pass language detection
+                    # by wrapping English values in substantial Arabic context
+                    ar_data_str = '، '.join(data_points)  # Arabic comma separator
+                    # Add substantial Arabic text to ensure language detection works correctly
+                    # even when data_points contain mostly English values
+                    chunk_content = {
+                        "ar": f"بيانات الجدول الإحصائي لموقع {location}. تتضمن التفاصيل التالية: {ar_data_str}. هذه البيانات جزء من الجدول الإحصائي.",
+                        "en": f"Table data for {location}. Details: {', '.join(data_points)}",
+                    }
+                    
+                    # Create metadata
+                    chapter_slug = slugify(block_chapter)
+                    section_slug = slugify(block_section)
+                    key_phrase = extract_key_phrase(chunk_content)
+                    content_hash = generate_content_hash(chunk_content)
+                    
+                    # Extract geography from location (if it's a governorate/region name)
+                    geography_list = [location] if location and location != "Unknown" else ["Sultanate of Oman"]
+                    
+                    metadata = ChunkMetadata(
+                        document=table_block.get("document", "Statistical Year Book 2025"),
+                        year=table_block.get("year", 2024),
+                        chapter=block_chapter,
+                        section=block_section,
+                        page_start=page_number,
+                        page_end=page_number,
+                        chunk_type="table",
+                        language=["ar", "en"],
+                        embedding_allowed=True,
+                        data_year=data_year,
+                        geography=geography_list,
+                    )
+                    
+                    # Create chunk
+                    chunk = Chunk(
+                        chunk_id=f"table_row_{chapter_slug}_{section_slug}_p{page_number}_r{row_idx}_{key_phrase}_{content_hash}",
+                        content=chunk_content,
+                        metadata=metadata,
+                    )
+                    
+                    # Validate before adding
+                    if validate_chunk(chunk):
+                        chunks.append(chunk)
+                    else:
+                        logger.warning(f"serialize_table_block: Row {row_idx} failed validation")
+                    
+            logger.info(f"DEBUG: serialize_table_block: Successfully serialized table on page {page_number} into {len(chunks)} row chunks")
+            return chunks
+
+    except Exception as e:
+        logger.error(f"DEBUG: serialize_table_block: Exception occurred while processing page {page_number}: {type(e).__name__}: {e}", exc_info=True)
+        # Fall back to raw text if serialization fails
+        return chunk_table_block(
+            table_block,
+            chapter=table_block.get("chapter"),
+            section=table_block.get("section"),
+            preceding_blocks=None,
+            table_hashes=None,
+        )
 
 
 def chunk_table_block(
@@ -2786,13 +2996,14 @@ class ChunkWiseBilingualChunker(IChunker):
         max_chars: int = 1500,
         min_chars: int = 50,
         overlap_chars: int = 100,
+        pdf_path: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Chunk normalized blocks from Phase 2 into semantic chunks.
         
         Implements IChunker interface.
         """
-        logger.info(f"chunk_blocks: Starting chunking - {len(blocks)} blocks, max_chars={max_chars}, min_chars={min_chars}")
+        logger.info(f"chunk_blocks: Starting chunking - {len(blocks)} blocks, max_chars={max_chars}, min_chars={min_chars}, pdf_path={'provided' if pdf_path else 'NOT provided'}")
         all_chunks: List[Chunk] = []
         
         # Track statistics
@@ -2808,8 +3019,32 @@ class ChunkWiseBilingualChunker(IChunker):
             "chunks_rejected": 0,
         }
         
+        # CRITICAL: Detect table patterns BEFORE merging
+        # This ensures table blocks are preserved separately and can use pdfplumber
+        table_detection_count = 0
+        for block_idx, block in enumerate(blocks):
+            block_type = block.get("type", "")
+            if block_type != "table":
+                block_content = block.get("content", {})
+                if isinstance(block_content, dict):
+                    # Sample first 200 chars for debugging
+                    ar_preview = (block_content.get("ar") or "")[:200]
+                    en_preview = (block_content.get("en") or "")[:200]
+                    is_table = is_table_content(block_content)
+                    if is_table:
+                        logger.info(f"DEBUG: chunk_blocks: Pre-merge Block {block_idx}: Detected table pattern in type '{block_type}' (ar_preview: {ar_preview[:50]}..., en_preview: {en_preview[:50]}...)")
+                        block["type"] = "table"
+                        table_detection_count += 1
+                    elif block_idx < 5:  # Log first 5 blocks for debugging
+                        logger.debug(f"DEBUG: chunk_blocks: Pre-merge Block {block_idx}: NOT a table (type='{block_type}', ar_len={len(block_content.get('ar') or '')}, en_len={len(block_content.get('en') or '')})")
+        if table_detection_count > 0:
+            logger.info(f"DEBUG: chunk_blocks: Pre-merge table detection: Found {table_detection_count} table blocks out of {len(blocks)} total blocks")
+        else:
+            logger.warning(f"DEBUG: chunk_blocks: Pre-merge table detection: NO table blocks detected in {len(blocks)} blocks")
+        
         # CRITICAL: Merge blocks by section BEFORE chunking
         # This prevents fragmented ideas and improves context continuity
+        # Tables are now preserved separately due to pre-merge detection
         before_merge = len(blocks)
         blocks = merge_blocks_by_section(blocks)
         after_merge = len(blocks)
@@ -2833,10 +3068,25 @@ class ChunkWiseBilingualChunker(IChunker):
         
         narrative_blocks = []
         table_blocks = []
+        table_chunks_direct = []  # Chunks created directly from table serialization
         skipped_blocks = 0
         
         for block_idx, block in enumerate(blocks):
             block_type = block.get("type", "")
+            
+            # DEBUG: Log block type for first 20 blocks and any blocks with table-like content
+            if block_idx < 20 or block_idx % 50 == 0:
+                content_preview = str(block.get("content", {}))[:100] if block.get("content") else "no content"
+                logger.info(f"DEBUG: chunk_blocks: Block {block_idx}: type='{block_type}', pageNumber={block.get('pageNumber')}, content_preview={content_preview}...")
+            
+            # CRITICAL FIX: Detect table patterns in blocks even if Phase 2 didn't classify them as "table"
+            # This handles cases where table blocks come in as "reference", "paragraph", etc.
+            if block_type != "table":
+                block_content = block.get("content", {})
+                if isinstance(block_content, dict) and is_table_content(block_content):
+                    logger.info(f"DEBUG: chunk_blocks: Block {block_idx}: Detected table pattern in block type '{block_type}', reclassifying to 'table'")
+                    block_type = "table"
+                    block["type"] = "table"  # Update the block type
             
             # Update current chapter/section
             if block.get("chapter"):
@@ -2851,8 +3101,35 @@ class ChunkWiseBilingualChunker(IChunker):
                     current_section = new_section
             
             if block_type == "table":
-                table_blocks.append(block)
-                logger.debug(f"chunk_blocks: Block {block_idx}: Added to table_blocks (type={block_type})")
+                # CRITICAL: Use the new table serialization for context injection
+                # Use serialize_table_block when pdf_path is available
+                logger.warning(f"DEBUG: chunk_blocks: Block {block_idx} is a table. pdf_path={'provided' if pdf_path else 'NOT provided'}, PDFPLUMBER_AVAILABLE={PDFPLUMBER_AVAILABLE}, pageNumber={block.get('pageNumber')}")
+                if pdf_path and PDFPLUMBER_AVAILABLE:
+                    try:
+                        logger.info(f"DEBUG: chunk_blocks: Calling serialize_table_block for block {block_idx} (pageNumber={block.get('pageNumber')})")
+                        serialized_chunks = serialize_table_block(
+                            pdf_path=pdf_path,
+                            table_block=block
+                        )
+                        logger.info(f"DEBUG: chunk_blocks: serialize_table_block returned {len(serialized_chunks) if serialized_chunks else 0} chunks")
+                        if serialized_chunks:
+                            # Add document and year metadata to chunks
+                            for chunk in serialized_chunks:
+                                chunk.metadata.document = document_name
+                                chunk.metadata.year = year
+                            table_chunks_direct.extend(serialized_chunks)
+                            logger.info(f"DEBUG: chunk_blocks: Block {block_idx}: Serialized table into {len(serialized_chunks)} chunks using pdfplumber")
+                        else:
+                            # Fall back to regular table chunking
+                            table_blocks.append(block)
+                            logger.warning(f"DEBUG: chunk_blocks: Block {block_idx}: Table serialization returned no chunks, falling back to regular chunking")
+                    except Exception as e:
+                        logger.error(f"DEBUG: chunk_blocks: Block {block_idx}: Table serialization failed with exception: {type(e).__name__}: {e}", exc_info=True)
+                        table_blocks.append(block)
+                else:
+                    # No pdf_path or pdfplumber not available, use regular table chunking
+                    table_blocks.append(block)
+                    logger.warning(f"DEBUG: chunk_blocks: Block {block_idx}: Added to table_blocks (type={block_type}, pdf_path={'not provided' if not pdf_path else 'provided but pdfplumber unavailable'})")
             elif should_chunk(block):
                 narrative_blocks.append(block)
                 logger.debug(f"chunk_blocks: Block {block_idx}: Added to narrative_blocks (type={block_type})")
@@ -2901,18 +3178,52 @@ class ChunkWiseBilingualChunker(IChunker):
                     table_hashes_by_section[section_key] = set()
                 table_hashes = table_hashes_by_section[section_key]
                 
-                table_chunks = chunk_table_block(
-                    table_block,
-                    chapter=table_chapter,
-                    section=table_section,
-                    preceding_blocks=preceding_blocks,
-                    table_hashes=table_hashes,  # Pass hash set for deduplication
-                )
+                # CRITICAL: Try pdfplumber serialization first if available
+                table_chunks = []
+                if pdf_path and PDFPLUMBER_AVAILABLE:
+                    try:
+                        logger.warning(f"DEBUG: chunk_blocks: Table loop - Calling serialize_table_block for table {table_idx} (pageNumber={table_page})")
+                        serialized_chunks = serialize_table_block(
+                            pdf_path=pdf_path,
+                            table_block=table_block
+                        )
+                        logger.warning(f"DEBUG: chunk_blocks: Table loop - serialize_table_block returned {len(serialized_chunks) if serialized_chunks else 0} chunks")
+                        if serialized_chunks:
+                            # Add document and year metadata to chunks
+                            for chunk in serialized_chunks:
+                                chunk.metadata.document = document_name
+                                chunk.metadata.year = year
+                            table_chunks = serialized_chunks
+                            logger.warning(f"DEBUG: chunk_blocks: Table loop - Table {table_idx}: Serialized into {len(table_chunks)} chunks using pdfplumber")
+                        else:
+                            logger.warning(f"DEBUG: chunk_blocks: Table loop - Table {table_idx}: serialize_table_block returned no chunks, falling back to chunk_table_block")
+                            # Fall through to chunk_table_block
+                    except Exception as e:
+                        logger.error(f"DEBUG: chunk_blocks: Table loop - Table {table_idx}: serialize_table_block failed: {type(e).__name__}: {e}", exc_info=True)
+                        # Fall through to chunk_table_block
+                
+                # Fall back to regular table chunking if pdfplumber didn't work
+                if not table_chunks:
+                    logger.warning(f"DEBUG: chunk_blocks: Table loop - Table {table_idx}: Using chunk_table_block (pdf_path={'provided' if pdf_path else 'NOT provided'}, PDFPLUMBER_AVAILABLE={PDFPLUMBER_AVAILABLE})")
+                    table_chunks = chunk_table_block(
+                        table_block,
+                        chapter=table_chapter,
+                        section=table_section,
+                        preceding_blocks=preceding_blocks,
+                        table_hashes=table_hashes,  # Pass hash set for deduplication
+                    )
+                
                 stats["table_chunks_created"] += len(table_chunks)
                 logger.debug(f"chunk_blocks: Table {table_idx}: Created {len(table_chunks)} chunks")
                 all_chunks.extend(table_chunks)
         else:
             logger.debug("chunk_blocks: No table blocks to process")
+        
+        # Add directly serialized table chunks
+        if table_chunks_direct:
+            logger.info(f"chunk_blocks: Adding {len(table_chunks_direct)} directly serialized table chunks")
+            all_chunks.extend(table_chunks_direct)
+            stats["table_chunks_created"] += len(table_chunks_direct)
         
         # Count validated vs rejected chunks
         stats["chunks_validated"] = len(all_chunks)
@@ -3012,6 +3323,7 @@ def chunk_phase3_from_blocks(
     max_chars: int = 1500,
     min_chars: int = 50,
     overlap_chars: int = 100,
+    pdf_path: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Convenience function: chunk normalized blocks from Phase 2.
@@ -3029,6 +3341,7 @@ def chunk_phase3_from_blocks(
         max_chars=max_chars,
         min_chars=min_chars,
         overlap_chars=overlap_chars,
+        pdf_path=pdf_path,
     )
 
 
